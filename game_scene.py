@@ -84,7 +84,7 @@ class GameScene(Scene):
         for i in range(8):
             for j in range(8):
                 x, y = self.chess_pos[i][j] 
-                self.add(f"indicator_{i}{j}", Button(text="X", x=x, y=y))
+                self.add(f"indicator_{i}{j}", Button(image=IMAGE(f"images/black_circle.png", False), x=x, y=y, width=40, height=40, opacity=0.8), 1)
                 self.get(f"indicator_{i}{j}").hide()
         for i in range(8):
             for j in range(8):
@@ -121,9 +121,13 @@ class GameScene(Scene):
             moves = self.get_possible_moves(piece)
             for move in moves:
                 row, col = move
-                indicator = self.get(f"indicator_{col}{row}")
-                indicator.show()
-                indicator.on_click = lambda: self.move(piece, row, col)
+                if self.board[col][row] is not None:
+                    indicator = self.get(f"board_{col}{row}")
+                    indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)
+                else:
+                    indicator = self.get(f"indicator_{col}{row}")
+                    indicator.show()
+                    indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)
             
         return select_piece
 
@@ -136,6 +140,8 @@ class GameScene(Scene):
                 self.get(f"indicator_{i}{j}").hide()
 
     def move(self, piece, row, col):
+        if self.board[col][row] is not None:
+            self.capture(self.board[col][row])
         p_row, p_col = piece.pos
         self.set_board(p_row, p_col, None)
         piece.pos[0] = row
@@ -143,6 +149,12 @@ class GameScene(Scene):
         self.set_board(row, col, piece)
         self.clear_moves()
 
+    def capture(self, piece):
+        is_black = piece.name[0]=='b'
+        if is_black:
+            self.bpieces.remove(piece)
+        else:
+            self.wpieces.remove(piece)
 
     def close(self):
         return super().close()
