@@ -20,6 +20,8 @@ class GameScenePVP(Scene):
         self.chess_pos = [[0]*8 for _ in range(8)]
         self.game = Game()
         self.selected_piece = None
+        self.text_display = self.add("text_display", Text("", size=20, x=600, y=100))
+        self.current_color = True
 
         for i in range(8):
             for j in range(8):
@@ -77,12 +79,15 @@ class GameScenePVP(Scene):
                 return
             self.selected_piece = piece
             moves = self.game.get_possible_moves(piece)
-            print(moves)
+            moves = list(filter(lambda x: self.game.is_legal(*x[1]), moves))
+            if len(moves)==0:
+                return
             for move in moves:
-                row, col = move[1]
+                row, col = move[1][1]
                 if self.game.board[col][row] is not None:
                     indicator = self.get(f"board_{col}{row}")
                     indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)
+                    indicator.can_hover = lambda: True
                     self.get(f"capture_{col}{row}").show()
                 else:
                     indicator = self.get(f"indicator_{col}{row}")
@@ -98,20 +103,25 @@ class GameScenePVP(Scene):
         for p in self.game.wpieces:
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
+            self.get(f"board_{col}{row}").can_hover = lambda: self.current_color
             self.get(f"capture_{col}{row}").hide()
         for p in self.game.bpieces:
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
+            self.get(f"board_{col}{row}").can_hover = lambda: not self.current_color
             self.get(f"capture_{col}{row}").hide()
             
 
     def move(self, piece, row, col):
         p_row, p_col = piece.pos
         self.game.move(piece, row, col)
+        self.clear_moves()
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
-        self.clear_moves()
         self.selected_piece = None
+        self.current_color = not self.current_color
+        if self.game.is_checkmate(self.current_color):
+            self.text_display.change_text(f'{"WBhliatcek"[self.current_color::2]} Checkmate!!!')
 
 
     def close(self):

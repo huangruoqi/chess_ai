@@ -20,6 +20,7 @@ class GameScenePVC(Scene):
         self.chess_pos = [[0]*8 for _ in range(8)]
         self.game = Game()
         self.selected_piece = None
+        self.text_display = self.add("text_display", Text("", size=20, x=600, y=100))
 
         for i in range(8):
             for j in range(8):
@@ -79,11 +80,12 @@ class GameScenePVC(Scene):
                 self.selected_piece = None
                 return
             moves = self.game.get_possible_moves(piece)
+            moves = list(filter(lambda x: self.game.is_legal(*x[1]), moves))
             if len(moves)==0:
                 return
             self.selected_piece = piece
             for move in moves:
-                row, col = move[1]
+                row, col = move[1][1]
                 if self.game.board[col][row] is not None:
                     indicator = self.get(f"board_{col}{row}")
                     indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)
@@ -118,7 +120,10 @@ class GameScenePVC(Scene):
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
         self.selected_piece = None
-        self.computer_move()
+        if self.game.is_checkmate(False):
+            self.text_display.change_text('White Checkmate!!!')
+        else:
+            self.computer_move()
         self.clear_moves()
 
     def computer_move(self):
@@ -128,6 +133,8 @@ class GameScenePVC(Scene):
         self.game.move(piece, row, col)
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
+        if self.game.is_checkmate(True):
+            self.text_display.change_text('Black Checkmate!!!')
 
 
     def close(self):

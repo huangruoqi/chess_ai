@@ -64,21 +64,55 @@ class Game:
         else:
             self.bpieces.remove(piece)
 
+    def is_checkmate(self, color):
+        for move in self.get_all_moves(color):
+            if self.is_legal(move[1][0], move[1][1]):
+                return False
+        return True
+    
+    def is_legal(self, piece, square):
+        opponent_pieces = self.bpieces if piece.color else self.wpieces
+        # move piece
+        captured = self.board[square[1]][square[0]]
+        current_square = piece.pos[0], piece.pos[1]
+        if captured is not None:
+            opponent_pieces.remove(captured)
+        self.board[square[1]][square[0]] = piece
+        piece.pos[0] = square[0]
+        piece.pos[1] = square[1]
+        self.board[current_square[1]][current_square[0]] = None
+
+        result = not self.is_check(piece.color)
+
+        # undo move
+        if captured is not None:
+            opponent_pieces.append(captured)
+        self.board[square[1]][square[0]] = captured
+        piece.pos[0] = current_square[0]
+        piece.pos[1] = current_square[1]
+        self.board[current_square[1]][current_square[0]] = piece
+
+        return result
+
+    def is_check(self, color):
+        return sorted(self.get_all_moves(not color), reverse=True)[0][0]==200
+
     def get_possible_moves(self, piece):
-        return {
+        return [ (i[0], (piece, i[1]))
+            for i in {
             'p': Rules.pawn,
             'r': Rules.rook,
             'q': Rules.queen,
             'b': Rules.bishop,
             'k': Rules.king,
             'n': Rules.knight,
-        }[piece.type](piece, self.board)
+        }[piece.type](piece, self.board)]
 
     def get_all_moves(self, color):
         pieces = self.wpieces if color else self.bpieces
         moves = []
         for p in pieces:
-            moves.extend([(i[0], (p, i[1])) for i in self.get_possible_moves(p)])
+            moves.extend(self.get_possible_moves(p))
         return moves
 
     def get_computer_move(self):
@@ -113,6 +147,8 @@ class Game:
         for move in moves:
             piece = move[1][0]
             square = move[1][1]
+
+            # move piece
             captured = self.board[square[1]][square[0]]
             current_square = piece.pos[0], piece.pos[1]
             if captured is not None:
@@ -121,13 +157,17 @@ class Game:
             piece.pos[0] = square[0]
             piece.pos[1] = square[1]
             self.board[current_square[1]][current_square[0]] = None
+
             value, _ = self.minimax(depth+1, not color, alpha, beta)
+
+            # undo move
             if captured is not None:
                 opponent_pieces.append(captured)
             self.board[square[1]][square[0]] = captured
             piece.pos[0] = current_square[0]
             piece.pos[1] = current_square[1]
             self.board[current_square[1]][current_square[0]] = piece
+
             if color and value < minimax_value:
                 minimax_value = value
                 beta = min(beta, value)
