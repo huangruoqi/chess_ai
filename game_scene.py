@@ -79,7 +79,7 @@ class GameScene(Scene):
             moves = self.game.get_possible_moves(piece)
             print(moves)
             for move in moves:
-                row, col = move
+                row, col = move[1]
                 if self.game.board[col][row] is not None:
                     indicator = self.get(f"board_{col}{row}")
                     indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)

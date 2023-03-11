@@ -83,31 +83,206 @@ class Rules:
         left = Rules.get(board, next_row, col - 1)
         right = Rules.get(board, next_row, col + 1)
         if front is None:
-            moves.append((next_row, col))
+            moves.append((0, (next_row, col)))
             if not piece.moved[0]:
                 next_2_row = row + [2, -2][piece.color]
                 if Rules.get(board, next_2_row, col) is None:
-                    moves.append((next_2_row, col))
+                    moves.append((0, (next_2_row, col)))
         if left and left.color!=piece.color:
-            moves.append((next_row, col - 1))
+            moves.append((left.score, (next_row, col - 1)))
         if right and right.color!=piece.color:
-            moves.append((next_row, col + 1))
+            moves.append((right.score, (next_row, col + 1)))
         return moves
 
     def rook(piece, board):
-        return []
+        moves = []
+        row, col = piece.pos
+        for r in range(row + 1, 8):
+            p = Rules.get(board, r, col)
+            if p is None:
+                moves.append((0, (r, col)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (r, col)))
+                break
+        for r in range(row - 1, -1, -1):
+            p = Rules.get(board, r, col)
+            if p is None:
+                moves.append((0, (r, col)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (r, col)))
+                break
+        for c in range(col + 1, 8):
+            p = Rules.get(board, row, c)
+            if p is None:
+                moves.append((0, (row, c)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row, c)))
+                break
+        for c in range(col - 1, -1, -1):
+            p = Rules.get(board, row, c)
+            if p is None:
+                moves.append((0, (row, c)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row, c)))
+                break
+        return moves
 
     def queen(piece, board):
-        return []
+        moves = []
+        row, col = piece.pos
+        for r in range(row + 1, 8):
+            p = Rules.get(board, r, col)
+            if p is None:
+                moves.append((0, (r, col)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (r, col)))
+                break
+        for r in range(row - 1, -1, -1):
+            p = Rules.get(board, r, col)
+            if p is None:
+                moves.append((0, (r, col)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (r, col)))
+                break
+        for c in range(col + 1, 8):
+            p = Rules.get(board, row, c)
+            if p is None:
+                moves.append((0, (row, c)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row, c)))
+                break
+        for c in range(col - 1, -1, -1):
+            p = Rules.get(board, row, c)
+            if p is None:
+                moves.append((0, (row, c)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row, c)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row - i, col - i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row - i, col - i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row - i, col - i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row + i, col + i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row + i, col + i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row + i, col + i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row - i, col + i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row - i, col + i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row - i, col + i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row + i, col - i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row + i, col - i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row + i, col - i)))
+                break
+        return moves
 
     def bishop(piece, board):
-        return []
+        moves = []
+        row, col = piece.pos
+        for i in range(1, 8):
+            p = Rules.get(board, row - i, col - i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row - i, col - i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row - i, col - i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row + i, col + i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row + i, col + i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row + i, col + i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row - i, col + i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row - i, col + i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row - i, col + i)))
+                break
+        for i in range(1, 8):
+            p = Rules.get(board, row + i, col - i)
+            if p is False:
+                break
+            if p is None:
+                moves.append((0, (row + i, col - i)))
+            else:
+                if p.color!=piece.color:
+                    moves.append((p.score, (row + i, col - i)))
+                break
+        return moves
 
     def king(piece, board):
-        return []
+        moves = []
+        row, col = piece.pos
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i==0==j: continue
+                p = Rules.get(board, row + i, col + j)
+                if p is False:
+                    continue
+                if p is None:
+                    moves.append((0, (row + i, col + j)))
+                elif p.color!=piece.color:
+                    moves.append((p.score, (row + i, col + j)))
+        return moves
 
     def knight(piece, board):
-        return []
+        moves = []
+        row, col = piece.pos
+        for a, b in [(1, 2), (2, 1)]:
+            for i in (1, -1):
+                for j in (1, -1):
+                    r, c = row + a * i, col + b * j
+                    p = Rules.get(board, r, c)
+                    if p is False:
+                        continue
+                    if p is None:
+                        moves.append((0, (r, c)))
+                    elif p.color!=piece.color:
+                        moves.append((p.score, (r, c)))
+        return moves
 
     def get(board, row, col):
         if 0<=row<=7 and 0<=col<=7:
