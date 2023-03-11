@@ -79,18 +79,19 @@ class Rules:
         moves = []
         row, col = piece.pos
         next_row = row + [1, -1][piece.color]
-        if Rules.get(board, next_row, col) is None:
-            moves.append((next_row, col))
+        front = Rules.get(board, next_row, col)
         left = Rules.get(board, next_row, col - 1)
         right = Rules.get(board, next_row, col + 1)
+        if front is None:
+            moves.append((next_row, col))
+            if not piece.moved[0]:
+                next_2_row = row + [2, -2][piece.color]
+                if Rules.get(board, next_2_row, col) is None:
+                    moves.append((next_2_row, col))
         if left and left.color!=piece.color:
             moves.append((next_row, col - 1))
         if right and right.color!=piece.color:
             moves.append((next_row, col + 1))
-        if not piece.moved[0]:
-            next_row = row + [2, -2][piece.color]
-            if Rules.get(board, next_row, col) is None:
-                moves.append((next_row, col))
         return moves
 
     def rook(piece, board):
