@@ -3,6 +3,8 @@ Piece = namedtuple('Piece',[
     "color", "type", "score", "pos", "moved"
 ])
 
+DEPTH = 4
+
 class Game:
     def __init__(self):
         self.board = [[None]*8 for _ in range(8)]
@@ -71,6 +73,82 @@ class Game:
             'k': Rules.king,
             'n': Rules.knight,
         }[piece.type](piece, self.board)
+
+    def get_all_moves(self, color):
+        pieces = self.wpieces if color else self.bpieces
+        moves = []
+        for p in pieces:
+            moves.extend([(i[0], (p, i[1])) for i in self.get_possible_moves(p)])
+        return moves
+
+    def get_computer_move(self):
+        move = self.minimax(0, False, -10000, 10000)
+        return move[1]
+
+    def get_score(self):
+        p_score = 0
+        for p in self.bpieces:
+            p_score+=p.score
+        for p in self.wpieces:
+            p_score-=p.score
+        white_moves = self.get_all_moves(True)
+        black_moves = self.get_all_moves(False)
+        t_score = 0
+        for i in white_moves:
+            t_score -= i[0]
+        for i in black_moves:
+            t_score += i[0]
+
+        return p_score + t_score//2
+
+    def minimax(self, depth, color, alpha, beta):
+        opponent_pieces = self.bpieces if color else self.wpieces
+        if depth >= DEPTH:
+            return self.get_score(), None
+        best_piece = None
+        best_move = None
+        moves = self.get_all_moves(color)
+        moves.sort(reverse=not color)
+        minimax_value = 10000 if color else -10000
+        for move in moves:
+            piece = move[1][0]
+            square = move[1][1]
+            captured = self.board[square[1]][square[0]]
+            current_square = piece.pos[0], piece.pos[1]
+            if captured is not None:
+                opponent_pieces.remove(captured)
+            self.board[square[1]][square[0]] = piece
+            piece.pos[0] = square[0]
+            piece.pos[1] = square[1]
+            self.board[current_square[1]][current_square[0]] = None
+            value, _ = self.minimax(depth+1, not color, alpha, beta)
+            if captured is not None:
+                opponent_pieces.append(captured)
+            self.board[square[1]][square[0]] = captured
+            piece.pos[0] = current_square[0]
+            piece.pos[1] = current_square[1]
+            self.board[current_square[1]][current_square[0]] = piece
+            if color and value < minimax_value:
+                minimax_value = value
+                beta = min(beta, value)
+                if beta <= alpha:
+                    return -10000, None
+                best_piece = piece
+                best_move = square
+            if not color and value > minimax_value:
+                minimax_value = value
+                alpha = max(alpha, value)
+                if beta <= alpha:
+                    return 10000, None
+                best_piece = piece
+                best_move = square
+        
+        return (minimax_value, (best_piece, best_move))
+            
+            
+
+
+    
 
 
 

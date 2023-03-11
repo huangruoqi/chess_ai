@@ -10,9 +10,9 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
-class GameScene(Scene):
+class GameScenePVC(Scene):
     def __init__(self, screen, *args, **kwargs):
-        super(GameScene, self).__init__(screen, *args, **kwargs)
+        super(GameScenePVC, self).__init__(screen, *args, **kwargs)
         white = pygame.Surface([1, 1])
         white.fill((235,236,208))
         black = pygame.Surface([1, 1])
@@ -68,6 +68,9 @@ class GameScene(Scene):
             square.set_image(IMAGE(f"images/{'bw'[piece.color]+piece.type}.png", False), 60, 60).set_pos(self.chess_pos[col][row])
             square.show()
             square.on_click = self.get_select_piece_func(piece)
+            if not piece.color:
+                square.can_hover = lambda: False
+
 
     def get_select_piece_func(self, piece):
         def select_piece():
@@ -75,14 +78,16 @@ class GameScene(Scene):
             if self.selected_piece == piece:
                 self.selected_piece = None
                 return
-            self.selected_piece = piece
             moves = self.game.get_possible_moves(piece)
-            print(moves)
+            if len(moves)==0:
+                return
+            self.selected_piece = piece
             for move in moves:
                 row, col = move[1]
                 if self.game.board[col][row] is not None:
                     indicator = self.get(f"board_{col}{row}")
                     indicator.on_click = (lambda r, c:lambda:self.move(piece, r, c))(row, col)
+                    indicator.can_hover = lambda: True
                     self.get(f"capture_{col}{row}").show()
                 else:
                     indicator = self.get(f"indicator_{col}{row}")
@@ -98,10 +103,12 @@ class GameScene(Scene):
         for p in self.game.wpieces:
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
+            self.get(f"board_{col}{row}").can_hover = lambda: True
             self.get(f"capture_{col}{row}").hide()
         for p in self.game.bpieces:
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
+            self.get(f"board_{col}{row}").can_hover = lambda: False
             self.get(f"capture_{col}{row}").hide()
             
 
@@ -110,8 +117,17 @@ class GameScene(Scene):
         self.game.move(piece, row, col)
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
-        self.clear_moves()
         self.selected_piece = None
+        self.computer_move()
+        self.clear_moves()
+
+    def computer_move(self):
+        piece, move = self.game.get_computer_move()
+        row, col = move
+        p_row, p_col = piece.pos
+        self.game.move(piece, row, col)
+        self.set_board(p_row, p_col, None)
+        self.set_board(row, col, piece)
 
 
     def close(self):
