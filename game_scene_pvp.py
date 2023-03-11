@@ -62,7 +62,6 @@ class GameScenePVP(Scene):
             self.set_board(row, col, p)
 
     def set_board(self, row, col, piece):
-        self.game.board[col][row] = piece
         square = self.get(f"board_{col}{row}")
         if piece is None:
             square.hide()
@@ -100,16 +99,17 @@ class GameScenePVP(Scene):
         for i in range(8):
             for j in range(8):
                 self.get(f"indicator_{i}{j}").hide()
+                self.get(f"capture_{i}{j}").hide()
         for p in self.game.wpieces:
+            if not self.game.wpieces_alive[p.index]: continue
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
             self.get(f"board_{col}{row}").can_hover = lambda: self.current_color
-            self.get(f"capture_{col}{row}").hide()
         for p in self.game.bpieces:
+            if not self.game.bpieces_alive[p.index]: continue
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
             self.get(f"board_{col}{row}").can_hover = lambda: not self.current_color
-            self.get(f"capture_{col}{row}").hide()
             
 
     def move(self, piece, row, col):

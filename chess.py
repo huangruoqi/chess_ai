@@ -1,49 +1,62 @@
+import random
+import time
 from collections import namedtuple
+
 Piece = namedtuple('Piece',[
-    "color", "type", "score", "pos", "moved"
+    "color", "type", "score", "pos", "moved", "index"
 ])
 
-DEPTH = 4
+DEPTH = 2
+
+def timeit(func):
+    def timeit_func(*args, **kwargs):
+        t = time.time()
+        result = func(*args, **kwargs)
+        print(f"{int(time.time()-t)} seconds")
+        return result
+    return timeit_func
 
 class Game:
     def __init__(self):
         self.board = [[None]*8 for _ in range(8)]
         self.bpieces = [
-            Piece(False, "r",   5, [0, 0], [False]),
-            Piece(False, "n",   3, [0, 1], [False]),
-            Piece(False, "b",   3, [0, 2], [False]),
-            Piece(False, "q",   9, [0, 3], [False]),
-            Piece(False, "k", 200, [0, 4], [False]),
-            Piece(False, "b",   3, [0, 5], [False]),
-            Piece(False, "n",   3, [0, 6], [False]),
-            Piece(False, "r",   5, [0, 7], [False]),
-            Piece(False, "p",   1, [1, 0], [False]),
-            Piece(False, "p",   1, [1, 1], [False]),
-            Piece(False, "p",   1, [1, 2], [False]),
-            Piece(False, "p",   1, [1, 3], [False]),
-            Piece(False, "p",   1, [1, 4], [False]),
-            Piece(False, "p",   1, [1, 5], [False]),
-            Piece(False, "p",   1, [1, 6], [False]),
-            Piece(False, "p",   1, [1, 7], [False]),
+            Piece(False, "r",   5, [0, 0], [False], 0),
+            Piece(False, "n",   3, [0, 1], [False], 1),
+            Piece(False, "b",   3, [0, 2], [False], 2),
+            Piece(False, "q",   9, [0, 3], [False], 3),
+            Piece(False, "k", 200, [0, 4], [False], 4),
+            Piece(False, "b",   3, [0, 5], [False], 5),
+            Piece(False, "n",   3, [0, 6], [False], 6),
+            Piece(False, "r",   5, [0, 7], [False], 7),
+            Piece(False, "p",   1, [1, 0], [False], 8),
+            Piece(False, "p",   1, [1, 1], [False], 9),
+            Piece(False, "p",   1, [1, 2], [False], 10),
+            Piece(False, "p",   1, [1, 3], [False], 11),
+            Piece(False, "p",   1, [1, 4], [False], 12),
+            Piece(False, "p",   1, [1, 5], [False], 13),
+            Piece(False, "p",   1, [1, 6], [False], 14),
+            Piece(False, "p",   1, [1, 7], [False], 15),
         ]
+        self.bpieces_alive = [True] * 16
         self.wpieces = [
-            Piece(True, "r",   5, [7, 0], [False]),
-            Piece(True, "n",   3, [7, 1], [False]),
-            Piece(True, "b",   3, [7, 2], [False]),
-            Piece(True, "q",   9, [7, 3], [False]),
-            Piece(True, "k", 200, [7, 4], [False]),
-            Piece(True, "b",   3, [7, 5], [False]),
-            Piece(True, "n",   3, [7, 6], [False]),
-            Piece(True, "r",   5, [7, 7], [False]),
-            Piece(True, "p",   1, [6, 0], [False]),
-            Piece(True, "p",   1, [6, 1], [False]),
-            Piece(True, "p",   1, [6, 2], [False]),
-            Piece(True, "p",   1, [6, 3], [False]),
-            Piece(True, "p",   1, [6, 4], [False]),
-            Piece(True, "p",   1, [6, 5], [False]),
-            Piece(True, "p",   1, [6, 6], [False]),
-            Piece(True, "p",   1, [6, 7], [False]),
+            Piece(True, "r",   5, [7, 0], [False], 0),
+            Piece(True, "n",   3, [7, 1], [False], 1),
+            Piece(True, "b",   3, [7, 2], [False], 2),
+            Piece(True, "q",   9, [7, 3], [False], 3),
+            Piece(True, "k", 200, [7, 4], [False], 4),
+            Piece(True, "b",   3, [7, 5], [False], 5),
+            Piece(True, "n",   3, [7, 6], [False], 6),
+            Piece(True, "r",   5, [7, 7], [False], 7),
+            Piece(True, "p",   1, [6, 0], [False], 8),
+            Piece(True, "p",   1, [6, 1], [False], 9),
+            Piece(True, "p",   1, [6, 2], [False], 10),
+            Piece(True, "p",   1, [6, 3], [False], 11),
+            Piece(True, "p",   1, [6, 4], [False], 12),
+            Piece(True, "p",   1, [6, 5], [False], 13),
+            Piece(True, "p",   1, [6, 6], [False], 14),
+            Piece(True, "p",   1, [6, 7], [False], 15),
         ]
+        self.wpieces_alive = [True] * 16
         for p in self.wpieces:
             row, col = p.pos
             self.board[col][row] = p
@@ -52,17 +65,21 @@ class Game:
             self.board[col][row] = p
 
     def move(self, piece, row, col):
+        p_row, p_col = piece.pos
         if self.board[col][row] is not None:
             self.capture(self.board[col][row])
+        self.board[col][row] = piece
+        self.board[p_col][p_row] = None
         piece.pos[0] = row
         piece.pos[1] = col
         piece.moved[0] = True
 
     def capture(self, piece):
+        print(piece)
         if piece.color:
-            self.wpieces.remove(piece)
+            self.wpieces_alive[piece.index] = False
         else:
-            self.bpieces.remove(piece)
+            self.bpieces_alive[piece.index] = False
 
     def is_checkmate(self, color):
         for move in self.get_all_moves(color):
@@ -71,12 +88,12 @@ class Game:
         return True
     
     def is_legal(self, piece, square):
-        opponent_pieces = self.bpieces if piece.color else self.wpieces
+        opponent_pieces_alive = self.bpieces_alive if piece.color else self.wpieces_alive
         # move piece
         captured = self.board[square[1]][square[0]]
         current_square = piece.pos[0], piece.pos[1]
         if captured is not None:
-            opponent_pieces.remove(captured)
+            opponent_pieces_alive[captured.index] = False
         self.board[square[1]][square[0]] = piece
         piece.pos[0] = square[0]
         piece.pos[1] = square[1]
@@ -86,7 +103,7 @@ class Game:
 
         # undo move
         if captured is not None:
-            opponent_pieces.append(captured)
+            opponent_pieces_alive[captured.index] = True
         self.board[square[1]][square[0]] = captured
         piece.pos[0] = current_square[0]
         piece.pos[1] = current_square[1]
@@ -95,7 +112,9 @@ class Game:
         return result
 
     def is_check(self, color):
-        return sorted(self.get_all_moves(not color), reverse=True)[0][0]==200
+        moves = self.get_all_moves(not color)
+        if len(moves)==0: return False
+        return sorted(moves, reverse=True)[0][0]==200
 
     def get_possible_moves(self, piece):
         return [ (i[0], (piece, i[1]))
@@ -110,16 +129,18 @@ class Game:
 
     def get_all_moves(self, color):
         pieces = self.wpieces if color else self.bpieces
+        pieces_alive = self.wpieces_alive if color else self.bpieces_alive
         moves = []
         for p in pieces:
-            moves.extend(self.get_possible_moves(p))
+            if pieces_alive[p.index]:
+                moves.extend(self.get_possible_moves(p))
         return moves
 
-    def get_computer_move(self):
-        move = self.minimax(0, False, -10000, 10000)
-        return move[1]
+    def get_real_moves(self, color):
+        return list(filter(lambda x: self.is_legal(*x[1]), self.get_all_moves(color)))
 
-    def get_score(self):
+
+    def get_score(self, flipped):
         p_score = 0
         for p in self.bpieces:
             p_score+=p.score
@@ -132,18 +153,18 @@ class Game:
             t_score -= i[0]
         for i in black_moves:
             t_score += i[0]
+        score = p_score + t_score//2
+        return -score if flipped else score
 
-        return p_score + t_score//2
-
-    def minimax(self, depth, color, alpha, beta):
-        opponent_pieces = self.bpieces if color else self.wpieces
+    def minimax(self, depth, color, alpha, beta, flipped, checked):
+        opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
         if depth >= DEPTH:
-            return self.get_score(), None
-        best_piece = None
-        best_move = None
-        moves = self.get_all_moves(color)
-        moves.sort(reverse=not color)
-        minimax_value = 10000 if color else -10000
+            return self.get_score(flipped), None
+        best = []
+        moves = self.get_real_moves(color) if checked else self.get_all_moves(color)
+        is_minimizing = not color if flipped else color
+        moves.sort(reverse=not is_minimizing)
+        minimax_value = 10000 if is_minimizing else -10000
         for move in moves:
             piece = move[1][0]
             square = move[1][1]
@@ -152,44 +173,61 @@ class Game:
             captured = self.board[square[1]][square[0]]
             current_square = piece.pos[0], piece.pos[1]
             if captured is not None:
-                opponent_pieces.remove(captured)
+                opponent_pieces_alive[captured.index] = False
             self.board[square[1]][square[0]] = piece
             piece.pos[0] = square[0]
             piece.pos[1] = square[1]
             self.board[current_square[1]][current_square[0]] = None
 
-            value, _ = self.minimax(depth+1, not color, alpha, beta)
+            value, _ = self.minimax(depth+1, not color, alpha, beta, flipped, checked)
 
             # undo move
             if captured is not None:
-                opponent_pieces.append(captured)
+                opponent_pieces_alive[captured.index] = True
             self.board[square[1]][square[0]] = captured
             piece.pos[0] = current_square[0]
             piece.pos[1] = current_square[1]
             self.board[current_square[1]][current_square[0]] = piece
 
-            if color and value < minimax_value:
-                minimax_value = value
-                beta = min(beta, value)
-                if beta <= alpha:
-                    return -10000, None
-                best_piece = piece
-                best_move = square
-            if not color and value > minimax_value:
-                minimax_value = value
-                alpha = max(alpha, value)
-                if beta <= alpha:
-                    return 10000, None
-                best_piece = piece
-                best_move = square
-        
-        return (minimax_value, (best_piece, best_move))
+            if is_minimizing:
+                if value < minimax_value:
+                    minimax_value = value
+                    beta = min(beta, value)
+                    if beta < alpha:
+                        return -10000, None
+                    best.clear()
+                if depth==0 and value == minimax_value:
+                    best.append((piece, square))
+            if not is_minimizing:
+                if value > minimax_value:
+                    minimax_value = value
+                    alpha = max(alpha, value)
+                    if beta < alpha:
+                        return 10000, None
+                    best.clear()
+                if depth==0 and value == minimax_value:
+                    best.append((piece, square))
+        best_choice = random.choice(best) if best else None
+        return (minimax_value, best_choice)
+
+    def get_computer_move(self, color):
+        move = self.minimax(0, color, -10000, 10000, color, False)
+        return move[1]
+
+    @timeit
+    def run_game_minimax(self):
+        color = True
+        turn = 0
+        while 1:
+            turn += 1
+            piece, move = self.get_computer_move(color)
+            self.move(piece, *move)
+            if self.is_checkmate(not color):
+                return color, turn
+            color = not color
+            if turn > 200:
+                return sum(self.bpieces_alive), sum(self.wpieces_alive)
             
-            
-
-
-    
-
 
 
 class Rules:
@@ -407,3 +445,7 @@ class Rules:
             return board[col][row]
         else:
             return False
+
+if __name__ == '__main__':
+    game = Game()
+    print(game.run_game_minimax())

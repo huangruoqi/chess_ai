@@ -10,9 +10,9 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
-class GameScenePVC(Scene):
+class GameScenePVC2(Scene):
     def __init__(self, screen, *args, **kwargs):
-        super(GameScenePVC, self).__init__(screen, *args, **kwargs)
+        super(GameScenePVC2, self).__init__(screen, *args, **kwargs)
         white = pygame.Surface([1, 1])
         white.fill((235,236,208))
         black = pygame.Surface([1, 1])
@@ -68,8 +68,6 @@ class GameScenePVC(Scene):
             square.set_image(IMAGE(f"images/{'bw'[piece.color]+piece.type}.png", False), 60, 60).set_pos(self.chess_pos[col][row])
             square.show()
             square.on_click = self.get_select_piece_func(piece)
-            if not piece.color:
-                square.can_hover = lambda: False
 
 
     def get_select_piece_func(self, piece):
@@ -106,13 +104,13 @@ class GameScenePVC(Scene):
             if not self.game.wpieces_alive[p.index]: continue
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
-            self.get(f"board_{col}{row}").can_hover = lambda: True
+            self.get(f"board_{col}{row}").can_hover = lambda: False
         for p in self.game.bpieces:
             if not self.game.bpieces_alive[p.index]: continue
             row, col = p.pos
             self.get(f"board_{col}{row}").on_click = self.get_select_piece_func(p)
-            self.get(f"board_{col}{row}").can_hover = lambda: False
-
+            self.get(f"board_{col}{row}").can_hover = lambda: True
+            
 
     def move(self, piece, row, col):
         p_row, p_col = piece.pos
@@ -120,21 +118,21 @@ class GameScenePVC(Scene):
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
         self.selected_piece = None
-        if self.game.is_checkmate(False):
-            self.text_display.change_text('White Checkmate!!!')
+        if self.game.is_checkmate(True):
+            self.text_display.change_text('Black Checkmate!!!')
         else:
             self.computer_move()
         self.clear_moves()
 
     def computer_move(self):
-        piece, move = self.game.get_computer_move(False)
+        piece, move = self.game.get_computer_move(True)
         row, col = move
         p_row, p_col = piece.pos
         self.game.move(piece, row, col)
         self.set_board(p_row, p_col, None)
         self.set_board(row, col, piece)
-        if self.game.is_checkmate(True):
-            self.text_display.change_text('Black Checkmate!!!')
+        if self.game.is_checkmate(False):
+            self.text_display.change_text('White Checkmate!!!')
 
 
     def close(self):
