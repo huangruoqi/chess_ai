@@ -81,13 +81,7 @@ class Game:
         else:
             self.bpieces_alive[piece.index] = False
 
-    def is_checkmate(self, color):
-        for move in self.get_all_moves(color):
-            if self.is_legal(move[1][0], move[1][1]):
-                return False
-        return True
-    
-    def is_legal(self, piece, square):
+    def move_and_run(self, piece, square, func):
         opponent_pieces_alive = self.bpieces_alive if piece.color else self.wpieces_alive
         # move piece
         captured = self.board[square[1]][square[0]]
@@ -99,8 +93,7 @@ class Game:
         piece.pos[1] = square[1]
         self.board[current_square[1]][current_square[0]] = None
 
-        result = not self.is_check(piece.color)
-
+        result = func()
         # undo move
         if captured is not None:
             opponent_pieces_alive[captured.index] = True
@@ -108,8 +101,16 @@ class Game:
         piece.pos[0] = current_square[0]
         piece.pos[1] = current_square[1]
         self.board[current_square[1]][current_square[0]] = piece
-
         return result
+
+    def is_checkmate(self, color):
+        for move in self.get_all_moves(color):
+            if self.is_legal(move[1][0], move[1][1]):
+                return False
+        return True
+    
+    def is_legal(self, piece, square):
+        return self.move_and_run(piece, square, lambda: not self.is_check(piece.color))
 
     def is_check(self, color):
         moves = self.get_all_moves(not color)
@@ -138,6 +139,7 @@ class Game:
 
     def get_real_moves(self, color):
         return list(filter(lambda x: self.is_legal(*x[1]), self.get_all_moves(color)))
+
 
 
     def get_score(self, flipped):
@@ -214,8 +216,30 @@ class Game:
         move = self.minimax(0, color, -10000, 10000, color, False)
         return move[1]
 
+    def get_ai_move(self, model, color):
+        moves = self.get_real_moves(color)
+        maximum = -1
+        best = None
+        for move in moves:
+            piece, square = move[1]
+            output = model.predict(self.get_board_input(piece, square))[0]
+            if best is None:
+                maximum = output
+                best = piece, square
+            elif maximum < output:
+                maximum = output
+                best = piece, square
+        return best
+        
+    def get_board_input(self, piece, square):
+        self.move_and_run(piece, square, lambda: self.convert_board())
+
+    def convert_board(self):
+        pass
+
+
     @timeit
-    def run_game_minimax(self):
+    def run_game_cvc(self):
         color = True
         turn = 0
         while 1:
@@ -227,6 +251,25 @@ class Game:
             color = not color
             if turn > 200:
                 return sum(self.bpieces_alive), sum(self.wpieces_alive)
+    
+    def run_game_avc(self):
+        color = True
+        turn = 0
+        model = ...
+        while 1:
+            turn += 1
+            if color:
+                piece, move = self.get_ai_move(model, color)
+                self.move(piece, *move)
+            else:
+                piece, move = self.get_computer_move(color)
+                self.move(piece, *move)
+            if self.is_checkmate(not color):
+                return color, turn
+            color = not color
+            if turn > 200:
+                return sum(self.bpieces_alive), sum(self.wpieces_alive)
+
             
 
 
