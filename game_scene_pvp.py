@@ -13,10 +13,6 @@ EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 class GameScenePVP(Scene):
     def __init__(self, screen, *args, **kwargs):
         super(GameScenePVP, self).__init__(screen, *args, **kwargs)
-        white = pygame.Surface([1, 1])
-        white.fill((235,236,208))
-        black = pygame.Surface([1, 1])
-        black.fill((119,149,86))
         self.chess_pos = [[0]*8 for _ in range(8)]
         self.game = Game()
         self.selected_piece = None
@@ -31,7 +27,7 @@ class GameScenePVP(Scene):
                 self.add(
                     f"bg_{i}{j}", 
                     Container(
-                        white if (i+j)&1==0 else black,
+                        "images/white.png" if (i+j)&1==0 else "images/black.png",
                         width=70, 
                         height=70, 
                         x=x,
@@ -42,17 +38,17 @@ class GameScenePVP(Scene):
         for i in range(8):
             for j in range(8):
                 x, y = self.chess_pos[i][j] 
-                self.add(f"indicator_{i}{j}", Button(image=IMAGE(f"images/black_circle.png", False), x=x, y=y, width=40, height=40, opacity=0.8), 1)
+                self.add(f"indicator_{i}{j}", Button(image_file="images/black_circle.png", x=x, y=y, width=40, height=40, opacity=0.8), 1)
                 self.get(f"indicator_{i}{j}").hide()
         for i in range(8):
             for j in range(8):
                 x, y = self.chess_pos[i][j] 
-                self.add(f"capture_{i}{j}", Container(image=IMAGE(f"images/black_ring.png", False), x=x, y=y, width=69, height=69, opacity=0.3), 2)
+                self.add(f"capture_{i}{j}", Container(image_file="images/black_ring.png", x=x, y=y, width=69, height=69, opacity=0.3), 2)
                 self.get(f"capture_{i}{j}").hide()
         for i in range(8):
             for j in range(8):
                 x, y = self.chess_pos[i][j] 
-                self.add(f"board_{i}{j}", Button(image=EMPTY, x=-1, y=-1))
+                self.add(f"board_{i}{j}", Button(x=-1, y=-1))
 
         for p in self.game.wpieces:
             row, col = p.pos
@@ -123,6 +119,3 @@ class GameScenePVP(Scene):
         if self.game.is_checkmate(self.current_color):
             self.text_display.change_text(f'{"WBhliatcek"[self.current_color::2]} Checkmate!!!')
 
-
-    def close(self):
-        return super().close()

@@ -6,8 +6,6 @@ Piece = namedtuple('Piece',[
     "color", "type", "score", "pos", "moved", "index"
 ])
 
-DEPTH = 2
-
 def timeit(func):
     def timeit_func(*args, **kwargs):
         t = time.time()
@@ -75,7 +73,6 @@ class Game:
         piece.moved[0] = True
 
     def capture(self, piece):
-        print(piece)
         if piece.color:
             self.wpieces_alive[piece.index] = False
         else:
@@ -155,12 +152,12 @@ class Game:
             t_score -= i[0]
         for i in black_moves:
             t_score += i[0]
-        score = p_score + t_score//2
+        score = p_score + t_score//4
         return -score if flipped else score
 
-    def minimax(self, depth, color, alpha, beta, flipped, checked):
+    def minimax(self, depth, color, alpha, beta, flipped, checked, max_depth):
         opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
-        if depth >= DEPTH:
+        if depth >= max_depth:
             return self.get_score(flipped), None
         best = []
         moves = self.get_real_moves(color) if checked else self.get_all_moves(color)
@@ -181,7 +178,7 @@ class Game:
             piece.pos[1] = square[1]
             self.board[current_square[1]][current_square[0]] = None
 
-            value, _ = self.minimax(depth+1, not color, alpha, beta, flipped, checked)
+            value, _ = self.minimax(depth+1, not color, alpha, beta, flipped, checked, max_depth)
 
             # undo move
             if captured is not None:
@@ -213,7 +210,8 @@ class Game:
         return (minimax_value, best_choice)
 
     def get_computer_move(self, color):
-        move = self.minimax(0, color, -10000, 10000, color, False)
+        depth = 1 if color else 3
+        move = self.minimax(0, color, -10000, 10000, color, True, depth)
         return move[1]
 
     def get_ai_move(self, model, color):

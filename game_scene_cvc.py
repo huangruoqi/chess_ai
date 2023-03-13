@@ -30,7 +30,7 @@ class GameSceneCVC(Scene):
                 self.add(
                     f"bg_{i}{j}", 
                     Container(
-                        white if (i+j)&1==0 else black,
+                        "images/white.png" if (i+j)&1==0 else "images/black.png",
                         width=70, 
                         height=70, 
                         x=x,
@@ -41,7 +41,7 @@ class GameSceneCVC(Scene):
         for i in range(8):
             for j in range(8):
                 x, y = self.chess_pos[i][j] 
-                self.add(f"board_{i}{j}", Button(image=EMPTY, x=-1, y=-1))
+                self.add(f"board_{i}{j}", Button(x=-1, y=-1))
 
         for p in self.game.wpieces:
             row, col = p.pos
@@ -84,6 +84,3 @@ class GameSceneCVC(Scene):
             self.color = not self.color
         self.wait_time += delta_time
 
-
-    def close(self):
-        return super().close()
