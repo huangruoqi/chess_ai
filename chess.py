@@ -1,6 +1,9 @@
 import random
 import time
 from collections import namedtuple
+import tensorflow as tf
+from tensorflow.keras import layers
+import numpy as np
 
 Piece = namedtuple('Piece',[
     "color", "type", "score", "pos", "moved", "index"
@@ -210,30 +213,37 @@ class Game:
         return (minimax_value, best_choice)
 
     def get_computer_move(self, color):
-        depth = 1 if color else 3
+        depth = 2
         move = self.minimax(0, color, -10000, 10000, color, True, depth)
         return move[1]
 
     def get_ai_move(self, model, color):
         moves = self.get_real_moves(color)
-        maximum = -1
-        best = None
+        output = model.predict(self.get_moves_input(moves), verbose=0)
+        output = map(lambda x: x[0], output)
+        return moves[max([(b if color else -b, a) for a, b in enumerate(output)])[1]][1]
+        
+    def get_moves_input(self, moves):
+        result = []
         for move in moves:
             piece, square = move[1]
-            output = model.predict(self.get_board_input(piece, square))[0]
-            if best is None:
-                maximum = output
-                best = piece, square
-            elif maximum < output:
-                maximum = output
-                best = piece, square
-        return best
-        
-    def get_board_input(self, piece, square):
-        self.move_and_run(piece, square, lambda: self.convert_board())
+            inputs = self.move_and_run(piece, square, lambda: self.convert_board())
+            result.append(inputs)
+        return np.array(result)
 
     def convert_board(self):
-        pass
+        piece2index = {p:[int(j==i) for j in range(6)] for i, p in enumerate('kqrbnp')}
+        board_code = []
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i][j]
+                if piece is None:
+                    board_code.extend([0]*7)
+                else:
+                    board_code.extend(piece2index[piece.type])
+                    board_code.append(int(piece.color))
+        return board_code
+
 
 
     @timeit
@@ -250,10 +260,22 @@ class Game:
             if turn > 200:
                 return sum(self.bpieces_alive), sum(self.wpieces_alive)
     
+    @timeit
     def run_game_avc(self):
         color = True
         turn = 0
         model = ...
+        model = tf.keras.Sequential(
+            [
+                layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
+                layers.Dense(400, activation="relu", name="layer2"),
+                layers.Dense(128, activation="relu", name="layer3"),
+                layers.Dense(32, activation="sigmoid", name="layer4"),
+                layers.Dense(8, activation="sigmoid", name="layer5"),
+                layers.Dense(1, activation="sigmoid", name="layer6"),
+            ]
+        )
+
         while 1:
             turn += 1
             if color:
@@ -489,4 +511,4 @@ class Rules:
 
 if __name__ == '__main__':
     game = Game()
-    print(game.run_game_minimax())
+    print(game.run_game_avc())
