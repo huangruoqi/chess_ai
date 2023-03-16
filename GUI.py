@@ -1,10 +1,10 @@
 from UI_BASE.UI.app import App
-from game_scene_pvp import GameScenePVP
-from game_scene_pvc import GameScenePVC
-from game_scene_pvc2 import GameScenePVC2
-from game_scene_cvc import GameSceneCVC
-from game_scene_avc import GameSceneAVC
-from game_scene_ava import GameSceneAVA
+from scenes.game_scene_pvp import GameScenePVP
+from scenes.game_scene_pvc import GameScenePVC
+from scenes.game_scene_pvc2 import GameScenePVC2
+from scenes.game_scene_cvc import GameSceneCVC
+from scenes.game_scene_avc import GameSceneAVC
+from scenes.game_scene_ava import GameSceneAVA
 import os
 import sys
 

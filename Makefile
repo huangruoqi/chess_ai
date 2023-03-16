@@ -21,3 +21,6 @@ ifeq (run,$(firstword $(MAKECMDGOALS)))
 endif
 run:
 	poetry run python -B ./GUI.py $(MODE)
+
+train:
+	poetry run python -B ./train.py
