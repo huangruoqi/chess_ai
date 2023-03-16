@@ -263,7 +263,7 @@ class Game:
         return board_code
 
 
-    @timeit
+    # @timeit
     def run_game_cvc(self):
         color = True
         depth = 2
@@ -279,10 +279,9 @@ class Game:
             if turn > 200:
                 return Result(None, turn, self.get_piece_score(True))
     
-    @timeit
-    def run_game_avc(self, model):
+    # @timeit
+    def run_game_avc(self, model, depth):
         color = True
-        depth = 2
         turn = 0
         previous_move2 = None
         previous_move1 = None
@@ -297,16 +296,41 @@ class Game:
                 move = self.get_computer_move(color, depth)
                 piece, square = move
                 if previous_move2 == move:
-                    return Result(None, 200, self.get_piece_score(True))
+                    return Result(None, turn, self.get_piece_score(True))
                 self.move(piece, *square)
                 previous_move2 = previous_move1
                 previous_move1 = move
-            if self.is_checkmate(not color) or turn > 200:
+            if self.is_checkmate(not color):
                 return Result(color, turn, self.get_piece_score(True))
             color = not color
             if turn > 200:
                 return Result(None, turn, self.get_piece_score(True))
 
+    def run_game_ava(self, model1, model2):
+        color = True
+        turn = 0
+        previous_move2 = None
+        previous_move1 = None
+
+        while 1:
+            turn += 1
+            if color:
+                move = self.get_ai_move(model1, color)
+                piece, square = move
+                self.move(piece, *square)
+            else:
+                move = self.get_ai_move(model2, color)
+                piece, square = move
+                if previous_move2 == move:
+                    return Result(None, turn, self.get_piece_score(True))
+                self.move(piece, *square)
+                previous_move2 = previous_move1
+                previous_move1 = move
+            if self.is_checkmate(not color):
+                return Result(color, turn, self.get_piece_score(True))
+            color = not color
+            if turn > 200:
+                return Result(None, turn, self.get_piece_score(True))
 
     
 
