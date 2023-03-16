@@ -69,10 +69,10 @@ def callback_generation(ga_instance):
         winner.set_weights(best_weights)
         save_model(winner, f'G_{str(ga_instance.generations_completed).zfill(4)}')
 
-keras_ga = pygad.kerasga.KerasGA(model=model, num_solutions=8)
+keras_ga = pygad.kerasga.KerasGA(model=model, num_solutions=20)
 initial_population = keras_ga.population_weights
 ga_instance = pygad.GA(num_generations=1000, 
-                       num_parents_mating=4, 
+                       num_parents_mating=5, 
                        initial_population=initial_population,
                        fitness_func=fitness_func,
                        on_generation=callback_generation,
