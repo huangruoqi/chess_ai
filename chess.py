@@ -230,8 +230,7 @@ class Game:
         best_choice = random.choice(best) if best else None
         return (minimax_value, best_choice)
 
-    def get_computer_move(self, color):
-        depth = 2
+    def get_computer_move(self, color, depth):
         move = self.minimax(0, color, -10000, 10000, color, True, depth)
         return move[1]
 
@@ -266,10 +265,11 @@ class Game:
     @timeit
     def run_game_cvc(self):
         color = True
+        depth = 2
         turn = 0
         while 1:
             turn += 1
-            move = self.get_computer_move(color)
+            move = self.get_computer_move(color, depth)
             piece, square = move
             self.move(piece, *square)
             if self.is_checkmate(not color):
@@ -281,6 +281,7 @@ class Game:
     @timeit
     def run_game_avc(self, model):
         color = True
+        depth = 2
         turn = 0
         previous_move2 = None
         previous_move1 = None
@@ -292,7 +293,7 @@ class Game:
                 piece, square = move
                 self.move(piece, *square)
             else:
-                move = self.get_computer_move(color)
+                move = self.get_computer_move(color, depth)
                 piece, square = move
                 if previous_move2 == move:
                     return Result(None, 200, self.get_piece_score(True))

@@ -10,6 +10,8 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
+DEPTH = 3
+
 class GameScenePVC(Scene):
     def __init__(self, screen, *args, **kwargs):
         super(GameScenePVC, self).__init__(screen, *args, **kwargs)
@@ -127,7 +129,7 @@ class GameScenePVC(Scene):
         self.clear_moves()
 
     def computer_move(self):
-        piece, move = self.game.get_computer_move(False)
+        piece, move = self.game.get_computer_move(False, DEPTH)
         row, col = move
         p_row, p_col = piece.pos
         self.game.move(piece, row, col)

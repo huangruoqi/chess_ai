@@ -12,6 +12,8 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
+DEPTH = 3
+
 class GameSceneAVC(Scene):
     def __init__(self, screen, *args, **kwargs):
         super(GameSceneAVC, self).__init__(screen, *args, **kwargs)
@@ -86,7 +88,7 @@ class GameSceneAVC(Scene):
             self.set_board(p_row, p_col, None)
             self.set_board(row, col, piece)
         else:
-            piece, move = self.game.get_computer_move(color)
+            piece, move = self.game.get_computer_move(color, DEPTH)
             p_row, p_col = piece.pos
             row, col = move
             self.game.move(piece, *move)

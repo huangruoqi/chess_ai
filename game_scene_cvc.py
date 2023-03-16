@@ -10,6 +10,8 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
+DEPTH = 3
+
 class GameSceneCVC(Scene):
     def __init__(self, screen, *args, **kwargs):
         super(GameSceneCVC, self).__init__(screen, *args, **kwargs)
@@ -65,7 +67,7 @@ class GameSceneCVC(Scene):
             square.can_hover = lambda: False
 
     def computer_move(self, color):
-        piece, move = self.game.get_computer_move(color)
+        piece, move = self.game.get_computer_move(color, DEPTH)
         row, col = move
         p_row, p_col = piece.pos
         self.game.move(piece, row, col)
