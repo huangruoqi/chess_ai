@@ -31,8 +31,8 @@ best_weights = model.get_weights()
 def save_model(model, name, fitness):
     model_path = os.path.join('model', name)
     tf.keras.models.save_model(model, os.path.join('model', name))
-    info_path = os.join(model_path, "info.txt")
-    with open(info_path) as f:
+    info_path = os.path.join(model_path, "info.txt")
+    with open(info_path, 'w') as f:
         f.write(f"<fitness> {fitness}")
 
 def fitness_func(solution, sol_idx):
@@ -67,7 +67,7 @@ def callback_generation(ga_instance):
     if winner_fitness < best_fitness:
         winner_fitness = best_fitness
         winner.set_weights(best_weights)
-        save_model(winner, f'G_{str(ga_instance.generations_completed).zfill(4)}')
+        save_model(winner, f'G_{str(ga_instance.generations_completed).zfill(4)}', winner_fitness)
 
 keras_ga = pygad.kerasga.KerasGA(model=model, num_solutions=20)
 initial_population = keras_ga.population_weights
