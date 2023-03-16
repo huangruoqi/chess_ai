@@ -67,7 +67,7 @@ def callback_generation(ga_instance):
     if winner_fitness < best_fitness:
         winner_fitness = best_fitness
         winner.set_weights(best_weights)
-        save_model(model, f'G_{str(ga_instance.generations_completed).zfill(4)}')
+        save_model(winner, f'G_{str(ga_instance.generations_completed).zfill(4)}')
 
 keras_ga = pygad.kerasga.KerasGA(model=model, num_solutions=8)
 initial_population = keras_ga.population_weights
