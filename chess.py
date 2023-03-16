@@ -177,6 +177,7 @@ class Game:
 
 
     def minimax(self, depth, color, alpha, beta, flipped, checked, max_depth):
+        random_choice = False
         opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
         if depth >= max_depth:
             return self.get_score(flipped), None
@@ -184,7 +185,7 @@ class Game:
         moves = self.get_real_moves(color) if checked else self.get_all_moves(color)
         is_minimizing = not color if flipped else color
         moves.sort(reverse=not is_minimizing)
-        minimax_value = 10000 if is_minimizing else -10000
+        minimax_value = 1000 if is_minimizing else -1000
         for move in moves:
             piece = move[1][0]
             square = move[1][1]
@@ -213,7 +214,7 @@ class Game:
                 if value < minimax_value:
                     minimax_value = value
                     beta = min(beta, value)
-                    if beta < alpha:
+                    if beta < alpha or (not random_choice and beta == alpha):
                         return -10000, None
                     best.clear()
                 if depth==0 and value == minimax_value:
@@ -222,7 +223,7 @@ class Game:
                 if value > minimax_value:
                     minimax_value = value
                     alpha = max(alpha, value)
-                    if beta < alpha:
+                    if beta < alpha or (not random_choice and beta == alpha):
                         return 10000, None
                     best.clear()
                 if depth==0 and value == minimax_value:
@@ -231,8 +232,8 @@ class Game:
         return (minimax_value, best_choice)
 
     def get_computer_move(self, color, depth):
-        move = self.minimax(0, color, -10000, 10000, color, True, depth)
-        return move[1]
+        score, move = self.minimax(0, color, -10000, 10000, color, True, depth)
+        return move
 
     def get_ai_move(self, model, color):
         moves = self.get_real_moves(color)

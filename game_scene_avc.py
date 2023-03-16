@@ -12,7 +12,7 @@ import pygame
 from pygame.locals import *  # noqa
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
-DEPTH = 3
+DEPTH = 4
 
 class GameSceneAVC(Scene):
     def __init__(self, screen, *args, **kwargs):
