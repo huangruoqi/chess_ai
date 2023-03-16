@@ -49,7 +49,7 @@ def fitness_func(solution, sol_idx):
     elif result.winner is None:
         turn_score = 0
     
-    match_score = 2 if result.winner else 0
+    match_score = 2 if result.winner else -1
     piece_score = tanh(result.piece_score/25)
     if result.winner is None: 
         match_score = 0
