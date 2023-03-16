@@ -3,16 +3,15 @@ from UI_BASE.UI.components.button import Button
 from UI_BASE.UI.components.container import Container
 from UI_BASE.UI.components.text import Text
 from UI_BASE.UI.utils import IMAGE
-from chess import Game
-import tensorflow as tf
-from tensorflow.keras import layers
-
-
+import os
 import pygame
 from pygame.locals import *  # noqa
+from chess import Game
+import tensorflow as tf
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
 DEPTH = 3
+MODEL_NAME = 'test'
 
 class GameSceneAVC(Scene):
     def __init__(self, screen, *args, **kwargs):
@@ -58,16 +57,7 @@ class GameSceneAVC(Scene):
         self.color = True
         self.wait_time = 0
 
-        self.model = tf.keras.Sequential(
-            [
-                layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
-                layers.Dense(400, activation="relu", name="layer2"),
-                layers.Dense(128, activation="relu", name="layer3"),
-                layers.Dense(32, activation="sigmoid", name="layer4"),
-                layers.Dense(8, activation="sigmoid", name="layer5"),
-                layers.Dense(1, activation="sigmoid", name="layer6"),
-            ]
-        )
+        self.model = tf.keras.models.load_model(os.path.join("model", MODEL_NAME))
 
 
     def set_board(self, row, col, piece):
