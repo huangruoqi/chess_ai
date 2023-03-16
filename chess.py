@@ -9,6 +9,10 @@ Piece = namedtuple('Piece',[
     "color", "type", "score", "pos", "moved", "index"
 ])
 
+Result = namedtuple('Result', [
+    "winner", "turn", "piece_score"
+])
+
 def timeit(func):
     def timeit_func(*args, **kwargs):
         t = time.time()
@@ -145,9 +149,11 @@ class Game:
     def get_score(self, flipped):
         p_score = 0
         for p in self.bpieces:
-            p_score+=p.score
+            if self.bpieces_alive[p.index]:
+                p_score+=p.score
         for p in self.wpieces:
-            p_score-=p.score
+            if self.wpieces_alive[p.index]:
+                p_score-=p.score
         white_moves = self.get_all_moves(True)
         black_moves = self.get_all_moves(False)
         t_score = 0
@@ -157,6 +163,18 @@ class Game:
             t_score += i[0]
         score = p_score + t_score//4
         return -score if flipped else score
+
+    def get_piece_score(self, flipped):
+        p_score = 0
+        for p in self.bpieces:
+            if self.bpieces_alive[p.index]:
+                p_score+=p.score
+        for p in self.wpieces:
+            if self.wpieces_alive[p.index]:
+                p_score-=p.score
+        assert abs(p_score) < 100
+        return -p_score if flipped else p_score
+
 
     def minimax(self, depth, color, alpha, beta, flipped, checked, max_depth):
         opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
@@ -245,50 +263,50 @@ class Game:
         return board_code
 
 
-
     @timeit
     def run_game_cvc(self):
         color = True
         turn = 0
         while 1:
             turn += 1
-            piece, move = self.get_computer_move(color)
-            self.move(piece, *move)
+            move = self.get_computer_move(color)
+            piece, square = move
+            self.move(piece, *square)
             if self.is_checkmate(not color):
-                return color, turn
+                return Result(color, turn, self.get_piece_score(True))
             color = not color
             if turn > 200:
-                return sum(self.bpieces_alive), sum(self.wpieces_alive)
+                return Result(None, turn, self.get_piece_score(True))
     
     @timeit
-    def run_game_avc(self):
+    def run_game_avc(self, model):
         color = True
         turn = 0
-        model = ...
-        model = tf.keras.Sequential(
-            [
-                layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
-                layers.Dense(400, activation="relu", name="layer2"),
-                layers.Dense(128, activation="relu", name="layer3"),
-                layers.Dense(32, activation="sigmoid", name="layer4"),
-                layers.Dense(8, activation="sigmoid", name="layer5"),
-                layers.Dense(1, activation="sigmoid", name="layer6"),
-            ]
-        )
+        previous_move2 = None
+        previous_move1 = None
 
         while 1:
             turn += 1
             if color:
-                piece, move = self.get_ai_move(model, color)
-                self.move(piece, *move)
+                move = self.get_ai_move(model, color)
+                piece, square = move
+                self.move(piece, *square)
             else:
-                piece, move = self.get_computer_move(color)
-                self.move(piece, *move)
-            if self.is_checkmate(not color):
-                return color, turn
+                move = self.get_computer_move(color)
+                piece, square = move
+                if previous_move2 == move:
+                    return Result(None, 200, self.get_piece_score(True))
+                self.move(piece, *square)
+                previous_move2 = previous_move1
+                previous_move1 = move
+            if self.is_checkmate(not color) or turn > 200:
+                return Result(color, turn, self.get_piece_score(True))
             color = not color
             if turn > 200:
-                return sum(self.bpieces_alive), sum(self.wpieces_alive)
+                return Result(None, turn, self.get_piece_score(True))
+
+
+    
 
             
 
@@ -510,5 +528,15 @@ class Rules:
             return False
 
 if __name__ == '__main__':
+    model = tf.keras.Sequential(
+        [
+            layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
+            layers.Dense(400, activation="relu", name="layer2"),
+            layers.Dense(128, activation="relu", name="layer3"),
+            layers.Dense(32, activation="sigmoid", name="layer4"),
+            layers.Dense(8, activation="sigmoid", name="layer5"),
+            layers.Dense(1, activation="sigmoid", name="layer6"),
+        ]
+    )
     game = Game()
-    print(game.run_game_avc())
+    print(game.run_game_avc(model))
