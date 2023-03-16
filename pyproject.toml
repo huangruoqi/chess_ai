@@ -9,6 +9,7 @@ packages = []
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12"
 pygame = "^2.2.0"
+pygad = "^2.19.2"
 
 
 [build-system]
