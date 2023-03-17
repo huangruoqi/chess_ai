@@ -4,8 +4,9 @@ from keras import layers, models
 import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
+import time
 
-LETTER = 'A'
+INSTANCE = str(int(time.time()))
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
@@ -80,9 +81,9 @@ def load_model(model_path):
     return [fitness, model]
 
 def save_model(model, name, fitness, temp=False):
-    model_path = os.path.join('model', LETTER, name)
+    model_path = os.path.join('model', INSTANCE, name)
     if temp:
-        model_path = os.path.join('temp_model', name)
+        model_path = os.path.join('temp_model', INSTANCE, name)
     if not os.path.exists(model_path):
         os.mkdir(model_path)
     model.save_weights(os.path.join(model_path, 'weights.h5'))
@@ -103,7 +104,7 @@ increase_minimax_depth = False
 
 def calculate_rank_score(base, result):
     opponent_score = base
-    turn_score = -sqrt(result.turn)/16 + 1
+    turn_score = -sqrt(result.turn)/8 + 1
     if result.winner is False:
         turn_score = -turn_score
     elif result.winner is None:
@@ -136,7 +137,6 @@ def fitness_func(solution, sol_idx):
             increase_minimax_depth = True
             rank_score += minimax_depth
     except Exception as e:
-        import time
         with open(os.path.join('logs', f'{int(time.time())}.txt')) as f:
             f.write(e)
     if rank_score > last_fitness:
@@ -155,18 +155,18 @@ def callback_generation(ga_instance):
         add_to_winners(last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
-        save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness, True)
+        save_model(dummy, f'{str(generation).zfill(4)}', last_fitness, True)
     last_fitness = 0
     if increase_minimax_depth:
         if minimax_depth < 3:
             minimax_depth += 1
-    if generation%20==1:
+    if generation%20==0:
         try:
             for i, v in enumerate(winners):
                 fitness, model = v
-                save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
+                save_model(model, f"{str(i).zfill(2)}", fitness)
             os.system('git add .')
-            os.system(f'git commit -m "{LETTER}-generation {generation}"')
+            os.system(f'git commit -m "{INSTANCE} - generation {generation}"')
             os.system('git push origin main')
             candidates = get_new_models()
             for c in candidates:
@@ -184,7 +184,7 @@ def get_new_models():
     training_instances = os.listdir('model')
     candidates = []
     for i in training_instances:
-        if i==LETTER: continue
+        if i==INSTANCE: continue
         instance_path = os.path.join('model', i)
         model_names = os.listdir(instance_path)
         model_names.sort(reverse=True)
