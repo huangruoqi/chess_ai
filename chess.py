@@ -239,7 +239,6 @@ class Game:
         moves = self.get_real_moves(color)
         output = model.predict(self.get_moves_input(moves), verbose=0)
         output = map(lambda x: x[0], output)
-        print()
         return moves[max([(b if color else -b, a) for a, b in enumerate(output)])[1]][1]
         
     def get_moves_input(self, moves):

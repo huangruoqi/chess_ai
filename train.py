@@ -138,7 +138,7 @@ def callback_generation(ga_instance):
         dummy.set_weights(last_weights)
         save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness, True)
     last_fitness = 0
-    if generation%10==1:
+    if generation%10==0:
         for i, v in enumerate(winners):
             fitness, model = v
             save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
