@@ -5,15 +5,18 @@ import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
 
-
+LETTER = 'G'
 INITIAL_MODELS = [
+    'G_10_0006',
     'G_02_0001',
-    'G_05_0001',
-    'G_05_0002',
     'G_09_0001',
     'G_09_0002',
     'G_09_0003',
     'G_09_0004',
+    'G_10_0001',
+    'G_10_0002',
+    'G_10_0003',
+    'G_10_0005',
 ]
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
@@ -36,6 +39,7 @@ dummy = tf.keras.Sequential([
 ])
 
 def add_to_winners(winners_, fitness, weights):
+    if winners_[0][0] >= fitness: return
     if len(winners_) < MAX_WINNERS:
         model = tf.keras.Sequential([
             layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
@@ -71,13 +75,19 @@ def save_model(model, name, fitness):
         f.write(f"<fitness> {fitness}")
 
 winners = [load_model(i) for i in INITIAL_MODELS]
-dummy.set_weights(winners[0][1].get_weights())
 winners.sort(key=lambda x: x[0])
+dummy.set_weights(winners[len(winners)-1][1].get_weights())
 last_winner = winners[0]
 last_fitness = last_winner[0]
 last_weights = last_winner[1].get_weights()
 previous_fitness = last_fitness
 
+for i, v in enumerate(winners):
+    fitness, model = v
+    save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
+os.system('git add .')
+os.system(f'git commit -m "test"')
+os.system('git push origin main')
 
 def calculate_rank_score(base, result):
     opponent_score = base
@@ -87,7 +97,7 @@ def calculate_rank_score(base, result):
     elif result.winner is None:
         turn_score = 0
     
-    match_score = 2 if result.winner else -1
+    match_score = 3 if result.winner else -1
     piece_score = tanh(result.piece_score/25)
     if result.winner is None: 
         match_score = 0
@@ -106,21 +116,62 @@ def fitness_func(solution, sol_idx):
         print(result)
     rank_score /= len(winners)
     print("{:.3f}".format(rank_score))
+    depth = 1
+    result = Game().run_game_avc(dummy, depth)
+    if result.winner:
+        print(f"Win against depth {depth} minimax")
+        save_model(dummy, f"WIN_MINIMAX_{depth}")
+        rank_score += 1
     if rank_score > last_fitness:
         last_fitness = rank_score
         last_weights = model_weights_matrix
     return rank_score
 
+
 def callback_generation(ga_instance):
     global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness
-    print("Generation = {generation}".format(generation=ga_instance.generations_completed))
-    print("Fitness    = {fitness}".format(fitness=ga_instance.best_solution()[1]))
+    generation = ga_instance.generations_completed
+    print("Generation = {generation}".format(generation=generation))
+    print("Fitness    = {fitness}".format(fitness=last_fitness))
     if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.01:
         add_to_winners(winners, last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
-        save_model(dummy, f'G_{str(round_numer).zfill(2)}_{str(ga_instance.generations_completed).zfill(4)}', last_fitness)
-        last_fitness = 0
+        save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness)
+    last_fitness = 0
+    if generation%10==9:
+        for i, v in enumerate(winners):
+            fitness, model = v
+            save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
+        os.system('git add .')
+        os.system(f'git commit -m "{LETTER}-generation {generation}"')
+        os.system('git push origin main')
+        candidates = get_new_models()
+        for c in candidates:
+            fitness, model = c
+            add_to_winners(winners, fitness, model.get_weights())
+    
+
+
+def get_new_models():
+    os.system("git pull origin main")
+    training_instances = os.listdir('saved_model')
+    candidates = []
+    for i in training_instances:
+        if i==LETTER: continue
+        instance_path = os.path.join('saved_model', i)
+        model_names = os.listdir(instance_path)
+        model_names.sort(reverse=True)
+        for j in model_names:
+            model_path = os.path.join(instance_path, j) 
+            with open(os.path.join(model_path, 'info.txt'), 'r') as f:
+                content = f.read().split()
+                assert len(content) == 2
+                fitness = float(content[1])
+                candidates.append((fitness, model_path))
+    candidates.sort(reverse=True)
+    return [load_model(k[1]) for k in candidates[:4]]
+        
 
 keras_ga = pygad.kerasga.KerasGA(model=dummy, num_solutions=NUM_SOLUTION)
 initial_population = keras_ga.population_weights
