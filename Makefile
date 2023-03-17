@@ -13,6 +13,7 @@ endif
 setup:
 	poetry install
 	poetry run pip install tensorflow==2.11.0 --force-reinstall
+	mkdir temp_model
 
 # If the first argument is "run"
 ifeq (run,$(firstword $(MAKECMDGOALS)))
