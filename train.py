@@ -5,7 +5,7 @@ import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
 
-LETTER = 'B'
+LETTER = 'A'
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
@@ -128,12 +128,17 @@ def fitness_func(solution, sol_idx):
         print(result)
     rank_score /= len(winners)
     print("{:.3f}".format(rank_score))
-    result = Game().run_game_avc(dummy, minimax_depth)
-    if result.winner:
-        print(f"Win against depth {minimax_depth} minimax")
-        save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
-        increase_minimax_depth = True
-        rank_score += 1
+    try:
+        result = Game().run_game_avc(dummy, minimax_depth)
+        if result.winner:
+            print(f"Win against depth {minimax_depth} minimax")
+            save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
+            increase_minimax_depth = True
+            rank_score += 1
+    except Exception as e:
+        import time
+        with open(os.path.join('logs', f'{int(time.time())}.txt')) as f:
+            f.write(e)
     if rank_score > last_fitness:
         last_fitness = rank_score
         last_weights = model_weights_matrix
@@ -155,16 +160,21 @@ def callback_generation(ga_instance):
         if minimax_depth < 3:
             minimax_depth += 1
     if generation%20==0:
-        for i, v in enumerate(winners):
-            fitness, model = v
-            save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
-        os.system('git add .')
-        os.system(f'git commit -m "{LETTER}-generation {generation}"')
-        os.system('git push origin main')
-        candidates = get_new_models()
-        for c in candidates:
-            fitness, model = c
-            add_to_winners(fitness, model.get_weights())
+        try:
+            for i, v in enumerate(winners):
+                fitness, model = v
+                save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
+            os.system('git add .')
+            os.system(f'git commit -m "{LETTER}-generation {generation}"')
+            os.system('git push origin main')
+            candidates = get_new_models()
+            for c in candidates:
+                fitness, model = c
+                add_to_winners(fitness, model.get_weights())
+        except Exception as e:
+            import time
+            with open(os.path.join('logs', f'{int(time.time())}.txt')) as f:
+                f.write(e)
     
 
 
