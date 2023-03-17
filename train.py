@@ -125,16 +125,16 @@ def fitness_func(solution, sol_idx):
         base, opponent = winners[i]
         result = Game().run_game_ava(dummy, opponent)
         rank_score += calculate_rank_score(base, result)
-        print(result)
+        # print(result)
     rank_score /= len(winners)
-    print("{:.3f}".format(rank_score))
+    # print("{:.3f}".format(rank_score))
     try:
         result = Game().run_game_avc(dummy, minimax_depth)
         if result.winner:
             print(f"Win against depth {minimax_depth} minimax")
             save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
             increase_minimax_depth = True
-            rank_score += 1
+            rank_score += minimax_depth
     except Exception as e:
         import time
         with open(os.path.join('logs', f'{int(time.time())}.txt')) as f:
@@ -150,6 +150,7 @@ def callback_generation(ga_instance):
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
+    print([x[0] for x in winners])
     if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.01:
         add_to_winners(last_fitness, last_weights)
         previous_fitness = last_fitness
@@ -159,7 +160,7 @@ def callback_generation(ga_instance):
     if increase_minimax_depth:
         if minimax_depth < 3:
             minimax_depth += 1
-    if generation%20==0:
+    if generation%20==1:
         try:
             for i, v in enumerate(winners):
                 fitness, model = v
