@@ -122,7 +122,6 @@ def fitness_func(solution, sol_idx):
         rank_score += calculate_rank_score(base, result)
         # print(result)
     rank_score /= len(winners)
-    # print("{:.3f}".format(rank_score))
     try:
         result = Game().run_game_avc(dummy, minimax_depth)
         if result.winner:
@@ -133,6 +132,7 @@ def fitness_func(solution, sol_idx):
     except Exception as e:
         with open(os.path.join('logs', f'{int(time.time())}.txt')) as f:
             f.write(e)
+    print("Rank: {:.3f}".format(rank_score))
     if rank_score > last_fitness:
         last_fitness = rank_score
         last_weights = model_weights_matrix
