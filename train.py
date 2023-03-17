@@ -83,7 +83,8 @@ def save_model(model, name, fitness, temp=False):
     model_path = os.path.join('model', LETTER, name)
     if temp:
         model_path = os.path.join('temp_model', name)
-    os.mkdir(model_path)
+    if not os.path.exists(model_path):
+        os.mkdir(model_path)
     model.save_weights(os.path.join(model_path, 'weights.h5'))
     # tf.keras.models.save_model(model, model_path)
     info_path = os.path.join(model_path, "info.txt")
