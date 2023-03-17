@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from tensorflow.keras import layers
+from keras import layers, models
 import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
@@ -25,6 +25,12 @@ dummy = tf.keras.Sequential([
     layers.Dense(8, activation="sigmoid", name="layer5"),
     layers.Dense(1, activation="sigmoid", name="layer6"),
 ])
+input_layer = layers.Input(batch_shape=dummy.layers[0].input_shape)
+prev_layer = input_layer
+for layer in dummy.layers:
+    layer._inbound_nodes = []
+    prev_layer = layer(prev_layer)
+dummy = models.Model([input_layer], [prev_layer])
 
 def get_initial_models():
     training_instances = os.listdir('model')
@@ -44,26 +50,27 @@ def get_initial_models():
     return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
 
 
-def add_to_winners(winners_, fitness, weights):
-    if winners_[0][0] >= fitness: return
-    if len(winners_) < MAX_WINNERS:
-        model = tf.keras.Sequential([
-            layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
-            layers.Dense(400, activation="relu", name="layer2"),
-            layers.Dense(128, activation="relu", name="layer3"),
-            layers.Dense(32, activation="sigmoid", name="layer4"),
-            layers.Dense(8, activation="sigmoid", name="layer5"),
-            layers.Dense(1, activation="sigmoid", name="layer6"),
-        ])
+def add_to_winners(fitness, weights):
+    global dummy, winners
+    if winners[0][0] >= fitness: return
+    for w in range(winners):
+        if abs(w[0] - fitness) < 0.01:
+            print("Duplicate winner found!!!")
+            return
+
+    if len(winners) < MAX_WINNERS:
+        model = models.clone_model(dummy)
         model.set_weights(weights)
-        winners_.append([fitness, model])
+        winners.append([fitness, model])
     else:
-        winners_[0][0] = fitness
-        winners_[0][1].set_weights(weights)
-    winners_.sort(key=lambda x: x[0])
+        winners[0][0] = fitness
+        winners[0][1].set_weights(weights)
+    winners.sort(key=lambda x: x[0])
 
 def load_model(model_path):
-    model = tf.keras.models.load_model(model_path)
+    global dummy
+    model = models.clone_model(dummy)
+    model.load_weights(os.path.join(model_path, 'weights.h5'))
     info_path = os.path.join(model_path, "info.txt")
     fitness = 0
     with open(info_path, 'r') as f:
@@ -76,7 +83,9 @@ def save_model(model, name, fitness, temp=False):
     model_path = os.path.join('model', LETTER, name)
     if temp:
         model_path = os.path.join('temp_model', name)
-    tf.keras.models.save_model(model, model_path)
+    os.mkdir(model_path)
+    model.save_weights(os.path.join(model_path, 'weights.h5'))
+    # tf.keras.models.save_model(model, model_path)
     info_path = os.path.join(model_path, "info.txt")
     with open(info_path, 'w') as f:
         f.write(f"<fitness> {fitness}")
@@ -88,6 +97,8 @@ last_winner = winners[0]
 last_fitness = last_winner[0]
 last_weights = last_winner[1].get_weights()
 previous_fitness = last_fitness
+minimax_depth = 1
+increase_minimax_depth = False
 
 def calculate_rank_score(base, result):
     opponent_score = base
@@ -105,7 +116,7 @@ def calculate_rank_score(base, result):
 
 
 def fitness_func(solution, sol_idx):
-    global keras_ga, dummy, last_fitness, last_weights, winners
+    global keras_ga, dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth
     model_weights_matrix = pygad.kerasga.model_weights_as_matrix(model=dummy, weights_vector=solution)
     dummy.set_weights(weights=model_weights_matrix)
     rank_score = 0
@@ -116,11 +127,11 @@ def fitness_func(solution, sol_idx):
         print(result)
     rank_score /= len(winners)
     print("{:.3f}".format(rank_score))
-    depth = 1
-    result = Game().run_game_avc(dummy, depth)
+    result = Game().run_game_avc(dummy, minimax_depth)
     if result.winner:
-        print(f"Win against depth {depth} minimax")
-        save_model(dummy, f"WIN_MINIMAX_{depth}", rank_score + 1)
+        print(f"Win against depth {minimax_depth} minimax")
+        save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1)
+        increase_minimax_depth = True
         rank_score += 1
     if rank_score > last_fitness:
         last_fitness = rank_score
@@ -129,16 +140,19 @@ def fitness_func(solution, sol_idx):
 
 
 def callback_generation(ga_instance):
-    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness
+    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness, increase_minimax_depth, minimax_depth
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
     if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.01:
-        add_to_winners(winners, last_fitness, last_weights)
+        add_to_winners(last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
         save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness, True)
     last_fitness = 0
+    if increase_minimax_depth:
+        if minimax_depth < 3:
+            minimax_depth += 1
     if generation%20==0:
         for i, v in enumerate(winners):
             fitness, model = v
@@ -149,7 +163,7 @@ def callback_generation(ga_instance):
         candidates = get_new_models()
         for c in candidates:
             fitness, model = c
-            add_to_winners(winners, fitness, model.get_weights())
+            add_to_winners(fitness, model.get_weights())
     
 
 
