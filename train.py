@@ -5,7 +5,7 @@ import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
 
-LETTER = 'A'
+LETTER = 'B'
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
@@ -53,7 +53,7 @@ def get_initial_models():
 def add_to_winners(fitness, weights):
     global dummy, winners
     if winners[0][0] >= fitness: return
-    for w in range(winners):
+    for w in winners:
         if abs(w[0] - fitness) < 0.01:
             print("Duplicate winner found!!!")
             return
