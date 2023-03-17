@@ -40,6 +40,7 @@ def get_initial_models():
                 fitness = float(content[1])
                 candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
+    print(candidates)
     return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
 
 
@@ -119,7 +120,7 @@ def fitness_func(solution, sol_idx):
     result = Game().run_game_avc(dummy, depth)
     if result.winner:
         print(f"Win against depth {depth} minimax")
-        save_model(dummy, f"WIN_MINIMAX_{depth}")
+        save_model(dummy, f"WIN_MINIMAX_{depth}", rank_score + 1)
         rank_score += 1
     if rank_score > last_fitness:
         last_fitness = rank_score
