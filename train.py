@@ -131,7 +131,7 @@ def fitness_func(solution, sol_idx):
     result = Game().run_game_avc(dummy, minimax_depth)
     if result.winner:
         print(f"Win against depth {minimax_depth} minimax")
-        save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1)
+        save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
         increase_minimax_depth = True
         rank_score += 1
     if rank_score > last_fitness:
