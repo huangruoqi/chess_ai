@@ -40,7 +40,7 @@ def get_initial_models():
                 fitness = float(content[1])
                 candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
-    print(candidates)
+    print(candidates[:MAX_WINNERS])
     return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
 
 
