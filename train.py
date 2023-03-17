@@ -5,7 +5,7 @@ import pygad.kerasga
 from chess import Game 
 from math import sqrt, tanh
 
-LETTER = 'G'
+LETTER = 'A'
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
@@ -33,11 +33,12 @@ def get_initial_models():
         instance_path = os.path.join('model', i)
         model_names = os.listdir(instance_path)
         for j in model_names:
-            with open(os.path.join(instance_path, j, 'info.txt'), 'r') as f:
+            model_path = os.path.join(instance_path, j)
+            with open(os.path.join(model_path, 'info.txt'), 'r') as f:
                 content = f.read().split()
                 assert len(content) == 2
                 fitness = float(content[1])
-                candidates.append((fitness, j))
+                candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
     return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
 
@@ -60,8 +61,7 @@ def add_to_winners(winners_, fitness, weights):
         winners_[0][1].set_weights(weights)
     winners_.sort(key=lambda x: x[0])
 
-def load_model(name):
-    model_path = os.path.join('model', LETTER, name)
+def load_model(model_path):
     model = tf.keras.models.load_model(model_path)
     info_path = os.path.join(model_path, "info.txt")
     fitness = 0
@@ -87,13 +87,6 @@ last_winner = winners[0]
 last_fitness = last_winner[0]
 last_weights = last_winner[1].get_weights()
 previous_fitness = last_fitness
-
-for i, v in enumerate(winners):
-    fitness, model = v
-    save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
-os.system('git add ./model/*')
-os.system(f'git commit -m "test"')
-os.system('git push origin main')
 
 def calculate_rank_score(base, result):
     opponent_score = base
@@ -145,7 +138,7 @@ def callback_generation(ga_instance):
         dummy.set_weights(last_weights)
         save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness, True)
     last_fitness = 0
-    if generation%10==9:
+    if generation%10==1:
         for i, v in enumerate(winners):
             fitness, model = v
             save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
@@ -169,11 +162,12 @@ def get_new_models():
         model_names = os.listdir(instance_path)
         model_names.sort(reverse=True)
         for j in model_names:
-            with open(os.path.join(instance_path, j, 'info.txt'), 'r') as f:
+            model_path = os.path.join(instance_path, j)
+            with open(os.path.join(model_path, 'info.txt'), 'r') as f:
                 content = f.read().split()
                 assert len(content) == 2
                 fitness = float(content[1])
-                candidates.append((fitness, j))
+                candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
     return [load_model(k[1]) for k in candidates[:4]]
         
