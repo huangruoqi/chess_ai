@@ -6,16 +6,6 @@ from chess import Game
 from math import sqrt, tanh
 
 LETTER = 'G'
-INITIAL_MODELS = [
-    'G_10_0006',
-    'G_10_0001',
-    'G_10_0002',
-    'G_10_0003',
-    'G_10_0005',
-    'G_11_0001',
-    'G_11_0002',
-    'G_11_0003',
-]
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
@@ -36,6 +26,22 @@ dummy = tf.keras.Sequential([
     layers.Dense(1, activation="sigmoid", name="layer6"),
 ])
 
+def get_initial_models():
+    training_instances = os.listdir('model')
+    candidates = []
+    for i in training_instances:
+        instance_path = os.path.join('model', i)
+        model_names = os.listdir(instance_path)
+        for j in model_names:
+            with open(os.path.join(instance_path, j, 'info.txt'), 'r') as f:
+                content = f.read().split()
+                assert len(content) == 2
+                fitness = float(content[1])
+                candidates.append((fitness, j))
+    candidates.sort(reverse=True)
+    return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
+
+
 def add_to_winners(winners_, fitness, weights):
     if winners_[0][0] >= fitness: return
     if len(winners_) < MAX_WINNERS:
@@ -55,8 +61,8 @@ def add_to_winners(winners_, fitness, weights):
     winners_.sort(key=lambda x: x[0])
 
 def load_model(name):
-    model_path = os.path.join('model', name)
-    model = tf.keras.models.load_model(os.path.join('model', name))
+    model_path = os.path.join('model', LETTER, name)
+    model = tf.keras.models.load_model(model_path)
     info_path = os.path.join(model_path, "info.txt")
     fitness = 0
     with open(info_path, 'r') as f:
@@ -65,14 +71,16 @@ def load_model(name):
         fitness = float(content[1])
     return [fitness, model]
 
-def save_model(model, name, fitness):
-    model_path = os.path.join('model', name)
-    tf.keras.models.save_model(model, os.path.join('model', name))
+def save_model(model, name, fitness, temp=False):
+    model_path = os.path.join('model', LETTER, name)
+    if temp:
+        model_path = os.path.join('temp_model', name)
+    tf.keras.models.save_model(model, model_path)
     info_path = os.path.join(model_path, "info.txt")
     with open(info_path, 'w') as f:
         f.write(f"<fitness> {fitness}")
 
-winners = [load_model(i) for i in INITIAL_MODELS]
+winners = get_initial_models()
 winners.sort(key=lambda x: x[0])
 dummy.set_weights(winners[len(winners)-1][1].get_weights())
 last_winner = winners[0]
@@ -83,7 +91,7 @@ previous_fitness = last_fitness
 for i, v in enumerate(winners):
     fitness, model = v
     save_model(model, f"{LETTER}_{str(i).zfill(2)}", fitness)
-os.system('git add .')
+os.system('git add ./model/*')
 os.system(f'git commit -m "test"')
 os.system('git push origin main')
 
@@ -135,7 +143,7 @@ def callback_generation(ga_instance):
         add_to_winners(winners, last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
-        save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness)
+        save_model(dummy, f'{LETTER}_{str(round_numer).zfill(2)}_{str(generation).zfill(4)}', last_fitness, True)
     last_fitness = 0
     if generation%10==9:
         for i, v in enumerate(winners):
@@ -153,24 +161,22 @@ def callback_generation(ga_instance):
 
 def get_new_models():
     os.system("git pull origin main")
-    training_instances = os.listdir('saved_model')
+    training_instances = os.listdir('model')
     candidates = []
     for i in training_instances:
         if i==LETTER: continue
-        instance_path = os.path.join('saved_model', i)
+        instance_path = os.path.join('model', i)
         model_names = os.listdir(instance_path)
         model_names.sort(reverse=True)
         for j in model_names:
-            model_path = os.path.join(instance_path, j) 
-            with open(os.path.join(model_path, 'info.txt'), 'r') as f:
+            with open(os.path.join(instance_path, j, 'info.txt'), 'r') as f:
                 content = f.read().split()
                 assert len(content) == 2
                 fitness = float(content[1])
-                candidates.append((fitness, model_path))
+                candidates.append((fitness, j))
     candidates.sort(reverse=True)
     return [load_model(k[1]) for k in candidates[:4]]
         
-
 keras_ga = pygad.kerasga.KerasGA(model=dummy, num_solutions=NUM_SOLUTION)
 initial_population = keras_ga.population_weights
 ga_instance = pygad.GA(num_generations=NUM_GENERATIONS, 
