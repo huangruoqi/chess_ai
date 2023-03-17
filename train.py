@@ -200,4 +200,5 @@ ga_instance = pygad.GA(num_generations=NUM_GENERATIONS,
                        fitness_func=fitness_func,
                        on_generation=callback_generation,
 )
+print(f"Instance: <{INSTANCE}> started!!!")
 ga_instance.run()
