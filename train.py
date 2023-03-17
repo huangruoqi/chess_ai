@@ -7,11 +7,11 @@ from math import sqrt, tanh
 
 
 INITIAL_MODELS = [
-    'G_0012', 
-    'G_0013', 
-    'G_0014', 
-    'G_0015', 
-    'G_0016', 
+    'G_01_0012', 
+    'G_01_0013', 
+    'G_01_0014', 
+    'G_01_0015', 
+    'G_01_0016', 
 ]
 MAX_WINNERS = 10
 NUM_SOLUTION = 20
