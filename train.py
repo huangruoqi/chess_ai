@@ -12,12 +12,6 @@ NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
 NUM_PARENTS_MATING = 4
 
-round_numer = 0
-with open('round.txt', 'r') as f:
-    round_numer = int(f.read())
-with open('round.txt', 'w') as f:
-    f.write(str(round_numer + 1))
-
 dummy = tf.keras.Sequential([
     layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
     layers.Dense(400, activation="relu", name="layer2"),
