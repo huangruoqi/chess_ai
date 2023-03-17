@@ -57,7 +57,7 @@ class GameSceneAVC(Scene):
         self.color = True
         self.wait_time = 0
 
-        self.model = tf.keras.models.load_model(os.path.join("model", MODEL_NAME))
+        self.model = tf.keras.models.load_model(os.path.join("saved_model", MODEL_NAME))
 
 
     def set_board(self, row, col, piece):

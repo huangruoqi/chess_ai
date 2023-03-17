@@ -5,6 +5,7 @@ from scenes.game_scene_pvc2 import GameScenePVC2
 from scenes.game_scene_cvc import GameSceneCVC
 from scenes.game_scene_avc import GameSceneAVC
 from scenes.game_scene_ava import GameSceneAVA
+from scenes.game_scene_pva import GameScenePVA
 import os
 import sys
 
@@ -17,6 +18,7 @@ scenes = {
     'cvc': GameSceneCVC,
     'avc': GameSceneAVC,
     'ava': GameSceneAVA,
+    'pva': GameScenePVA,
 }
 
 app = App(

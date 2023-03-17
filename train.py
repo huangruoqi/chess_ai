@@ -7,16 +7,18 @@ from math import sqrt, tanh
 
 
 INITIAL_MODELS = [
-    'G_01_0012', 
-    'G_01_0013', 
-    'G_01_0014', 
-    'G_01_0015', 
-    'G_01_0016', 
+    'G_02_0001',
+    'G_05_0001',
+    'G_05_0002',
+    'G_09_0001',
+    'G_09_0002',
+    'G_09_0003',
+    'G_09_0004',
 ]
 MAX_WINNERS = 10
-NUM_SOLUTION = 20
+NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
-NUM_PARENTS_MATING = 5
+NUM_PARENTS_MATING = 4
 
 round_numer = 0
 with open('round.txt', 'r') as f:
@@ -69,11 +71,12 @@ def save_model(model, name, fitness):
         f.write(f"<fitness> {fitness}")
 
 winners = [load_model(i) for i in INITIAL_MODELS]
+dummy.set_weights(winners[0][1].get_weights())
 winners.sort(key=lambda x: x[0])
-dummy.set_weights(winners[len(winners)-1][1].get_weights())
 last_winner = winners[0]
 last_fitness = last_winner[0]
 last_weights = last_winner[1].get_weights()
+previous_fitness = last_fitness
 
 
 def calculate_rank_score(base, result):
@@ -109,13 +112,15 @@ def fitness_func(solution, sol_idx):
     return rank_score
 
 def callback_generation(ga_instance):
-    global keras_ga, dummy, last_fitness, last_weights, winners
+    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness
     print("Generation = {generation}".format(generation=ga_instance.generations_completed))
     print("Fitness    = {fitness}".format(fitness=ga_instance.best_solution()[1]))
-    if winners[0][0] < last_fitness:
+    if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.01:
         add_to_winners(winners, last_fitness, last_weights)
+        previous_fitness = last_fitness
         dummy.set_weights(last_weights)
         save_model(dummy, f'G_{str(round_numer).zfill(2)}_{str(ga_instance.generations_completed).zfill(4)}', last_fitness)
+        last_fitness = 0
 
 keras_ga = pygad.kerasga.KerasGA(model=dummy, num_solutions=NUM_SOLUTION)
 initial_population = keras_ga.population_weights
