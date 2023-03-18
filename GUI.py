@@ -12,13 +12,13 @@ import sys
 MAX_HEIGHT = 900
 
 scenes = {
-    'pvp': GameScenePVP,
-    'pvc': GameScenePVC,
-    'pvc2': GameScenePVC2,
-    'cvc': GameSceneCVC,
-    'avc': GameSceneAVC,
-    'ava': GameSceneAVA,
-    'pva': GameScenePVA,
+    "pvp": GameScenePVP,
+    "pvc": GameScenePVC,
+    "pvc2": GameScenePVC2,
+    "cvc": GameSceneCVC,
+    "avc": GameSceneAVC,
+    "ava": GameSceneAVA,
+    "pva": GameScenePVA,
 }
 
 app = App(

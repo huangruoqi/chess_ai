@@ -5,13 +5,12 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
 
-Piece = namedtuple('Piece',[
-    "color", "type", "score", "pos", "start_pos", "moved", "index"
-])
+Piece = namedtuple(
+    "Piece", ["color", "type", "score", "pos", "start_pos", "moved", "index"]
+)
 
-Result = namedtuple('Result', [
-    "winner", "turn", "piece_score"
-])
+Result = namedtuple("Result", ["winner", "turn", "piece_score"])
+
 
 def timeit(func):
     def timeit_func(*args, **kwargs):
@@ -19,47 +18,49 @@ def timeit(func):
         result = func(*args, **kwargs)
         print(f"{int(time.time()-t)} seconds")
         return result
+
     return timeit_func
+
 
 class Game:
     def __init__(self):
-        self.board = [[None]*8 for _ in range(8)]
+        self.board = [[None] * 8 for _ in range(8)]
         self.bpieces = [
-            Piece(False, "r",   5, [0, 0], (0, 0), [False], 0),
-            Piece(False, "n",   3, [0, 1], (0, 1), [False], 1),
-            Piece(False, "b",   3, [0, 2], (0, 2), [False], 2),
-            Piece(False, "q",   9, [0, 3], (0, 3), [False], 3),
+            Piece(False, "r", 5, [0, 0], (0, 0), [False], 0),
+            Piece(False, "n", 3, [0, 1], (0, 1), [False], 1),
+            Piece(False, "b", 3, [0, 2], (0, 2), [False], 2),
+            Piece(False, "q", 9, [0, 3], (0, 3), [False], 3),
             Piece(False, "k", 200, [0, 4], (0, 4), [False], 4),
-            Piece(False, "b",   3, [0, 5], (0, 5), [False], 5),
-            Piece(False, "n",   3, [0, 6], (0, 6), [False], 6),
-            Piece(False, "r",   5, [0, 7], (0, 7), [False], 7),
-            Piece(False, "p",   1, [1, 0], (1, 0), [False], 8),
-            Piece(False, "p",   1, [1, 1], (1, 1), [False], 9),
-            Piece(False, "p",   1, [1, 2], (1, 2), [False], 10),
-            Piece(False, "p",   1, [1, 3], (1, 3), [False], 11),
-            Piece(False, "p",   1, [1, 4], (1, 4), [False], 12),
-            Piece(False, "p",   1, [1, 5], (1, 5), [False], 13),
-            Piece(False, "p",   1, [1, 6], (1, 6), [False], 14),
-            Piece(False, "p",   1, [1, 7], (1, 7), [False], 15),
+            Piece(False, "b", 3, [0, 5], (0, 5), [False], 5),
+            Piece(False, "n", 3, [0, 6], (0, 6), [False], 6),
+            Piece(False, "r", 5, [0, 7], (0, 7), [False], 7),
+            Piece(False, "p", 1, [1, 0], (1, 0), [False], 8),
+            Piece(False, "p", 1, [1, 1], (1, 1), [False], 9),
+            Piece(False, "p", 1, [1, 2], (1, 2), [False], 10),
+            Piece(False, "p", 1, [1, 3], (1, 3), [False], 11),
+            Piece(False, "p", 1, [1, 4], (1, 4), [False], 12),
+            Piece(False, "p", 1, [1, 5], (1, 5), [False], 13),
+            Piece(False, "p", 1, [1, 6], (1, 6), [False], 14),
+            Piece(False, "p", 1, [1, 7], (1, 7), [False], 15),
         ]
         self.bpieces_alive = [True] * 16
         self.wpieces = [
-            Piece(True, "r",   5, [7, 0], (7, 0), [False], 0),
-            Piece(True, "n",   3, [7, 1], (7, 1), [False], 1),
-            Piece(True, "b",   3, [7, 2], (7, 2), [False], 2),
-            Piece(True, "q",   9, [7, 3], (7, 3), [False], 3),
+            Piece(True, "r", 5, [7, 0], (7, 0), [False], 0),
+            Piece(True, "n", 3, [7, 1], (7, 1), [False], 1),
+            Piece(True, "b", 3, [7, 2], (7, 2), [False], 2),
+            Piece(True, "q", 9, [7, 3], (7, 3), [False], 3),
             Piece(True, "k", 200, [7, 4], (7, 4), [False], 4),
-            Piece(True, "b",   3, [7, 5], (7, 5), [False], 5),
-            Piece(True, "n",   3, [7, 6], (7, 6), [False], 6),
-            Piece(True, "r",   5, [7, 7], (7, 7), [False], 7),
-            Piece(True, "p",   1, [6, 0], (6, 0), [False], 8),
-            Piece(True, "p",   1, [6, 1], (6, 1), [False], 9),
-            Piece(True, "p",   1, [6, 2], (6, 2), [False], 10),
-            Piece(True, "p",   1, [6, 3], (6, 3), [False], 11),
-            Piece(True, "p",   1, [6, 4], (6, 4), [False], 12),
-            Piece(True, "p",   1, [6, 5], (6, 5), [False], 13),
-            Piece(True, "p",   1, [6, 6], (6, 6), [False], 14),
-            Piece(True, "p",   1, [6, 7], (6, 7), [False], 15),
+            Piece(True, "b", 3, [7, 5], (7, 5), [False], 5),
+            Piece(True, "n", 3, [7, 6], (7, 6), [False], 6),
+            Piece(True, "r", 5, [7, 7], (7, 7), [False], 7),
+            Piece(True, "p", 1, [6, 0], (6, 0), [False], 8),
+            Piece(True, "p", 1, [6, 1], (6, 1), [False], 9),
+            Piece(True, "p", 1, [6, 2], (6, 2), [False], 10),
+            Piece(True, "p", 1, [6, 3], (6, 3), [False], 11),
+            Piece(True, "p", 1, [6, 4], (6, 4), [False], 12),
+            Piece(True, "p", 1, [6, 5], (6, 5), [False], 13),
+            Piece(True, "p", 1, [6, 6], (6, 6), [False], 14),
+            Piece(True, "p", 1, [6, 7], (6, 7), [False], 15),
         ]
         self.wpieces_alive = [True] * 16
         for p in self.wpieces:
@@ -68,9 +69,9 @@ class Game:
         for p in self.bpieces:
             row, col = p.pos
             self.board[col][row] = p
-    
+
     def reset(self):
-        self.board = [[None]*8 for _ in range(8)]
+        self.board = [[None] * 8 for _ in range(8)]
         for i in range(8):
             for j in range(8):
                 self.board[i][j] = None
@@ -89,8 +90,6 @@ class Game:
         for i in range(16):
             self.bpieces_alive[i] = True
             self.wpieces_alive[i] = True
-            
-
 
     def move(self, piece, row, col):
         p_row, p_col = piece.pos
@@ -109,7 +108,9 @@ class Game:
             self.bpieces_alive[piece.index] = False
 
     def move_and_run(self, piece, square, func):
-        opponent_pieces_alive = self.bpieces_alive if piece.color else self.wpieces_alive
+        opponent_pieces_alive = (
+            self.bpieces_alive if piece.color else self.wpieces_alive
+        )
         # move piece
         captured = self.board[square[1]][square[0]]
         current_square = piece.pos[0], piece.pos[1]
@@ -135,25 +136,28 @@ class Game:
             if self.is_legal(move[1][0], move[1][1]):
                 return False
         return True
-    
+
     def is_legal(self, piece, square):
         return self.move_and_run(piece, square, lambda: not self.is_check(piece.color))
 
     def is_check(self, color):
         moves = self.get_all_moves(not color)
-        if len(moves)==0: return False
-        return sorted(moves, reverse=True)[0][0]==200
+        if len(moves) == 0:
+            return False
+        return sorted(moves, reverse=True)[0][0] == 200
 
     def get_possible_moves(self, piece):
-        return [ (i[0], (piece, i[1]))
+        return [
+            (i[0], (piece, i[1]))
             for i in {
-            'p': Rules.pawn,
-            'r': Rules.rook,
-            'q': Rules.queen,
-            'b': Rules.bishop,
-            'k': Rules.king,
-            'n': Rules.knight,
-        }[piece.type](piece, self.board)]
+                "p": Rules.pawn,
+                "r": Rules.rook,
+                "q": Rules.queen,
+                "b": Rules.bishop,
+                "k": Rules.king,
+                "n": Rules.knight,
+            }[piece.type](piece, self.board)
+        ]
 
     def get_all_moves(self, color):
         pieces = self.wpieces if color else self.bpieces
@@ -167,16 +171,14 @@ class Game:
     def get_real_moves(self, color):
         return list(filter(lambda x: self.is_legal(*x[1]), self.get_all_moves(color)))
 
-
-
     def get_score(self, flipped):
         p_score = 0
         for p in self.bpieces:
             if self.bpieces_alive[p.index]:
-                p_score+=p.score
+                p_score += p.score
         for p in self.wpieces:
             if self.wpieces_alive[p.index]:
-                p_score-=p.score
+                p_score -= p.score
         white_moves = self.get_all_moves(True)
         black_moves = self.get_all_moves(False)
         t_score = 0
@@ -184,20 +186,19 @@ class Game:
             t_score -= i[0]
         for i in black_moves:
             t_score += i[0]
-        score = p_score + t_score//4
+        score = p_score + t_score // 4
         return -score if flipped else score
 
     def get_piece_score(self, flipped):
         p_score = 0
         for p in self.bpieces:
             if self.bpieces_alive[p.index]:
-                p_score+=p.score
+                p_score += p.score
         for p in self.wpieces:
             if self.wpieces_alive[p.index]:
-                p_score-=p.score
+                p_score -= p.score
         assert abs(p_score) < 100
         return -p_score if flipped else p_score
-
 
     def minimax(self, depth, color, alpha, beta, flipped, checked, max_depth):
         random_choice = False
@@ -223,7 +224,9 @@ class Game:
             piece.pos[1] = square[1]
             self.board[current_square[1]][current_square[0]] = None
 
-            value, _ = self.minimax(depth+1, not color, alpha, beta, flipped, checked, max_depth)
+            value, _ = self.minimax(
+                depth + 1, not color, alpha, beta, flipped, checked, max_depth
+            )
 
             # undo move
             if captured is not None:
@@ -240,7 +243,7 @@ class Game:
                     if beta < alpha or (not random_choice and beta == alpha):
                         return -10000, None
                     best.clear()
-                if depth==0 and value == minimax_value:
+                if depth == 0 and value == minimax_value:
                     best.append((piece, square))
             if not is_minimizing:
                 if value > minimax_value:
@@ -249,7 +252,7 @@ class Game:
                     if beta < alpha or (not random_choice and beta == alpha):
                         return 10000, None
                     best.clear()
-                if depth==0 and value == minimax_value:
+                if depth == 0 and value == minimax_value:
                     best.append((piece, square))
         best_choice = random.choice(best) if best else None
         return (minimax_value, best_choice)
@@ -263,7 +266,7 @@ class Game:
         output = model.predict(self.get_moves_input(moves), verbose=0)
         output = map(lambda x: x[0], output)
         return moves[max([(b if color else -b, a) for a, b in enumerate(output)])[1]][1]
-        
+
     def get_moves_input(self, moves):
         result = []
         for move in moves:
@@ -273,18 +276,19 @@ class Game:
         return np.array(result)
 
     def convert_board(self):
-        piece2index = {p:[int(j==i) for j in range(6)] for i, p in enumerate('kqrbnp')}
+        piece2index = {
+            p: [int(j == i) for j in range(6)] for i, p in enumerate("kqrbnp")
+        }
         board_code = []
         for i in range(8):
             for j in range(8):
                 piece = self.board[i][j]
                 if piece is None:
-                    board_code.extend([0]*7)
+                    board_code.extend([0] * 7)
                 else:
                     board_code.extend(piece2index[piece.type])
                     board_code.append(int(piece.color))
         return board_code
-
 
     # @timeit
     def run_game_cvc(self):
@@ -301,7 +305,7 @@ class Game:
             color = not color
             if turn > 200:
                 return Result(None, turn, self.get_piece_score(True))
-    
+
     # @timeit
     def run_game_avc(self, model, depth):
         color = True
@@ -355,10 +359,6 @@ class Game:
             if turn > 200:
                 return Result(None, turn, self.get_piece_score(True))
 
-    
-
-            
-
 
 class Rules:
     def pawn(piece, board):
@@ -374,9 +374,9 @@ class Rules:
                 next_2_row = row + [2, -2][piece.color]
                 if Rules.get(board, next_2_row, col) is None:
                     moves.append((0, (next_2_row, col)))
-        if left and left.color!=piece.color:
+        if left and left.color != piece.color:
             moves.append((left.score, (next_row, col - 1)))
-        if right and right.color!=piece.color:
+        if right and right.color != piece.color:
             moves.append((right.score, (next_row, col + 1)))
         return moves
 
@@ -388,7 +388,7 @@ class Rules:
             if p is None:
                 moves.append((0, (r, col)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (r, col)))
                 break
         for r in range(row - 1, -1, -1):
@@ -396,7 +396,7 @@ class Rules:
             if p is None:
                 moves.append((0, (r, col)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (r, col)))
                 break
         for c in range(col + 1, 8):
@@ -404,7 +404,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row, c)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row, c)))
                 break
         for c in range(col - 1, -1, -1):
@@ -412,7 +412,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row, c)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row, c)))
                 break
         return moves
@@ -425,7 +425,7 @@ class Rules:
             if p is None:
                 moves.append((0, (r, col)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (r, col)))
                 break
         for r in range(row - 1, -1, -1):
@@ -433,7 +433,7 @@ class Rules:
             if p is None:
                 moves.append((0, (r, col)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (r, col)))
                 break
         for c in range(col + 1, 8):
@@ -441,7 +441,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row, c)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row, c)))
                 break
         for c in range(col - 1, -1, -1):
@@ -449,7 +449,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row, c)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row, c)))
                 break
         for i in range(1, 8):
@@ -459,7 +459,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row - i, col - i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row - i, col - i)))
                 break
         for i in range(1, 8):
@@ -469,7 +469,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row + i, col + i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row + i, col + i)))
                 break
         for i in range(1, 8):
@@ -479,7 +479,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row - i, col + i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row - i, col + i)))
                 break
         for i in range(1, 8):
@@ -489,7 +489,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row + i, col - i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row + i, col - i)))
                 break
         return moves
@@ -504,7 +504,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row - i, col - i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row - i, col - i)))
                 break
         for i in range(1, 8):
@@ -514,7 +514,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row + i, col + i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row + i, col + i)))
                 break
         for i in range(1, 8):
@@ -524,7 +524,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row - i, col + i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row - i, col + i)))
                 break
         for i in range(1, 8):
@@ -534,7 +534,7 @@ class Rules:
             if p is None:
                 moves.append((0, (row + i, col - i)))
             else:
-                if p.color!=piece.color:
+                if p.color != piece.color:
                     moves.append((p.score, (row + i, col - i)))
                 break
         return moves
@@ -544,13 +544,14 @@ class Rules:
         row, col = piece.pos
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if i==0==j: continue
+                if i == 0 == j:
+                    continue
                 p = Rules.get(board, row + i, col + j)
                 if p is False:
                     continue
                 if p is None:
                     moves.append((0, (row + i, col + j)))
-                elif p.color!=piece.color:
+                elif p.color != piece.color:
                     moves.append((p.score, (row + i, col + j)))
         return moves
 
@@ -566,17 +567,18 @@ class Rules:
                         continue
                     if p is None:
                         moves.append((0, (r, c)))
-                    elif p.color!=piece.color:
+                    elif p.color != piece.color:
                         moves.append((p.score, (r, c)))
         return moves
 
     def get(board, row, col):
-        if 0<=row<=7 and 0<=col<=7:
+        if 0 <= row <= 7 and 0 <= col <= 7:
             return board[col][row]
         else:
             return False
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     model = tf.keras.Sequential(
         [
             layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),

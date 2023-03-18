@@ -124,6 +124,8 @@ def calculate_rank_score(base, result):
 
 
 game = Game()
+
+
 def fitness_func(solution, sol_idx):
     global keras_ga, dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth, game
     model_weights_matrix = pygad.kerasga.model_weights_as_matrix(
