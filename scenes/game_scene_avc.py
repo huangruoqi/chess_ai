@@ -8,11 +8,12 @@ import pygame
 from pygame.locals import *  # noqa
 from chess import Game
 import tensorflow as tf
+from utils import Chess_Model
 
 EMPTY = pygame.Surface([1, 1], pygame.SRCALPHA)
 
 DEPTH = 3
-MODEL_NAME = "test"
+MODEL_NAME = "init/00"
 
 
 class GameSceneAVC(Scene):
@@ -59,7 +60,8 @@ class GameSceneAVC(Scene):
         self.color = True
         self.wait_time = 0
 
-        self.model = tf.keras.models.load_model(os.path.join("saved_model", MODEL_NAME))
+        self.chess_model = Chess_Model()
+        self.model = self.chess_model.load_model(os.path.join("model", MODEL_NAME))[1]
 
     def set_board(self, row, col, piece):
         square = self.get(f"board_{col}{row}")

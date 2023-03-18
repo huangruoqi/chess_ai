@@ -7,6 +7,7 @@ from math import sqrt, tanh
 import time
 import gc
 import keras.backend as K
+from utils import Chess_Model
 
 d = tf.config.experimental.list_physical_devices('GPU')
 if d:
@@ -14,29 +15,17 @@ if d:
 # tf.debugging.set_log_device_placement(True)
 
 
+
 INSTANCE = str(int(time.time()))
 MAX_WINNERS = 10
 NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
 NUM_PARENTS_MATING = 5
+DEBUG = True
 
-dummy = tf.keras.Sequential(
-    [
-        layers.Dense(600, input_shape=(448,), activation="tanh", name="layer1"),
-        layers.Dense(400, activation="tanh", name="layer2"),
-        layers.Dense(128, activation="tanh", name="layer3"),
-        layers.Dense(32, activation="tanh", name="layer4"),
-        layers.Dense(8, activation="tanh", name="layer5"),
-        layers.Dense(1, activation="tanh", name="layer6"),
-    ]
-)
-input_layer = layers.Input(batch_shape=dummy.layers[0].input_shape)
-prev_layer = input_layer
-for layer in dummy.layers:
-    layer._inbound_nodes = []
-    prev_layer = layer(prev_layer)
-dummy = models.Model([input_layer], [prev_layer])
 
+chess_model = Chess_Model()
+dummy = chess_model.get_clone()
 
 def get_initial_models():
     training_instances = os.listdir("model")
@@ -53,11 +42,11 @@ def get_initial_models():
                 candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
     [print(i) for i in candidates[:MAX_WINNERS]]
-    return [load_model(k[1]) for k in candidates[:MAX_WINNERS]]
+    return [chess_model.load_model(k[1]) for k in candidates[:MAX_WINNERS]]
 
 
 def add_to_winners(fitness, weights):
-    global dummy, winners
+    global chess_model, winners
     if winners[0][0] >= fitness:
         return
     for w in winners:
@@ -66,42 +55,13 @@ def add_to_winners(fitness, weights):
             return
 
     if len(winners) < MAX_WINNERS:
-        model = models.clone_model(dummy)
+        model = chess_model.get_clone()
         model.set_weights(weights)
         winners.append([fitness, model])
     else:
         winners[0][0] = fitness
         winners[0][1].set_weights(weights)
     winners.sort(key=lambda x: x[0])
-
-
-def load_model(model_path):
-    global dummy
-    model = models.clone_model(dummy)
-    model.load_weights(os.path.join(model_path, "weights.h5"))
-    info_path = os.path.join(model_path, "info.txt")
-    fitness = 0
-    with open(info_path, "r") as f:
-        content = f.read().split()
-        assert len(content) == 2
-        fitness = float(content[1])
-    return [fitness, model]
-
-
-def save_model(model, name, fitness, temp=False):
-    instance_path = os.path.join("model", INSTANCE)
-    if temp:
-        instance_path = os.path.join("temp_model", INSTANCE)
-    model_path = os.path.join(instance_path, name)
-    if not os.path.exists(instance_path):
-        os.mkdir(instance_path)
-    if not os.path.exists(model_path):
-        os.mkdir(model_path)
-    model.save_weights(os.path.join(model_path, "weights.h5"))
-    info_path = os.path.join(model_path, "info.txt")
-    with open(info_path, "w") as f:
-        f.write(f"<fitness> {fitness}")
-
 
 winners = get_initial_models()
 winners.sort(key=lambda x: x[0])
@@ -147,14 +107,15 @@ def fitness_func(solution, sol_idx):
         if result.winner:
             wins += 1
         rank_score += calculate_rank_score(base, result)
-        # print(result)
+        if DEBUG:
+            print(result)
     rank_score /= len(winners)
     try:
         game.reset()
         result = game.run_game_avc(dummy, minimax_depth)
         if result.winner:
             print(f"Win against depth {minimax_depth} minimax")
-            save_model(dummy, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
+            chess_model.save_model(dummy, INSTANCE, f"WIN_MINIMAX_{minimax_depth}", rank_score + 1, True)
             increase_minimax_depth = True
             rank_score += minimax_depth
     except Exception as e:
@@ -178,7 +139,7 @@ def callback_generation(ga_instance):
         add_to_winners(last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
-        save_model(dummy, f"{str(generation).zfill(4)}", last_fitness, True)
+        chess_model.save_model(dummy, INSTANCE, f"{str(generation).zfill(4)}", last_fitness, True)
     last_fitness = 0
     # if increase_minimax_depth:
     #     if minimax_depth < 3:
@@ -187,7 +148,7 @@ def callback_generation(ga_instance):
         try:
             for i, v in enumerate(winners[6:]):
                 fitness, model = v
-                save_model(model, f"{str(i).zfill(2)}", fitness)
+                chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness)
             os.system("git add .")
             os.system(f'git commit -m "{INSTANCE} - generation {generation}"')
             os.system("git pull origin main")

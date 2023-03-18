@@ -86,4 +86,4 @@ for i in training_instances:
     for j in model_names:
         model_path = os.path.join(instance_path, j)
         fitness, model = load_model(model_path)
-        save_model(model, j, fitness)
+        save_model(model,LETTER, j, fitness)

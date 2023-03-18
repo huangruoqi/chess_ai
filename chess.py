@@ -11,6 +11,8 @@ Piece = namedtuple(
 
 Result = namedtuple("Result", ["winner", "turn", "piece_score"])
 
+AI_MARGIN = 0.1
+DEBUG = False
 
 def timeit(func):
     def timeit_func(*args, **kwargs):
@@ -264,10 +266,13 @@ class Game:
     def get_ai_move(self, model, color):
         moves = self.get_real_moves(color)
         output = model.predict(self.get_moves_input(moves), verbose=0)
-        output = list(map(lambda x: x[0], output))
-        print(sorted(output))
-        max_index = max([(b if color else -b, a) for a, b in enumerate(output)])[1]
-        return moves[max_index][1]
+        output = [x[0] if color else -x[0] for x in output]
+        output = [(b, a) for a, b in enumerate(output)]
+        max_value = max(output)[0]
+        candidates = list(filter(lambda x: x[0]>max_value-AI_MARGIN, output))
+        if DEBUG:
+            print(candidates)
+        return moves[random.choice(candidates)[1]][1]
 
     def get_moves_input(self, moves):
         result = []
@@ -338,8 +343,6 @@ class Game:
     def run_game_ava(self, model1, model2):
         color = True
         turn = 0
-        previous_move2 = None
-        previous_move1 = None
 
         while 1:
             turn += 1
@@ -350,11 +353,7 @@ class Game:
             else:
                 move = self.get_ai_move(model2, color)
                 piece, square = move
-                if previous_move2 == move:
-                    return Result(None, turn, self.get_piece_score(True))
                 self.move(piece, *square)
-                previous_move2 = previous_move1
-                previous_move1 = move
             if self.is_checkmate(not color):
                 return Result(color, turn, self.get_piece_score(True))
             color = not color

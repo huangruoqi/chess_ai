@@ -6,6 +6,7 @@ from UI_BASE.UI.utils import IMAGE
 from chess import Game
 import tensorflow as tf
 from tensorflow.keras import layers
+from utils import Chess_Model
 
 
 import pygame
@@ -57,33 +58,9 @@ class GameSceneAVA(Scene):
         self.stop = False
         self.color = True
         self.wait_time = 0
+        self.chess_model = Chess_Model()
 
-        self.model = [
-            tf.keras.Sequential(
-                [
-                    layers.Dense(
-                        600, input_shape=(448,), activation="relu", name="layer1"
-                    ),
-                    layers.Dense(400, activation="relu", name="layer2"),
-                    layers.Dense(128, activation="relu", name="layer3"),
-                    layers.Dense(32, activation="sigmoid", name="layer4"),
-                    layers.Dense(8, activation="sigmoid", name="layer5"),
-                    layers.Dense(1, activation="sigmoid", name="layer6"),
-                ]
-            ),
-            tf.keras.Sequential(
-                [
-                    layers.Dense(
-                        600, input_shape=(448,), activation="relu", name="layer1"
-                    ),
-                    layers.Dense(400, activation="relu", name="layer2"),
-                    layers.Dense(128, activation="relu", name="layer3"),
-                    layers.Dense(32, activation="sigmoid", name="layer4"),
-                    layers.Dense(8, activation="sigmoid", name="layer5"),
-                    layers.Dense(1, activation="sigmoid", name="layer6"),
-                ]
-            ),
-        ]
+        self.model = [self.chess_model.load_model('model/init/00')[1], self.chess_model.load_model('model/init/01')[1]]
 
     def set_board(self, row, col, piece):
         square = self.get(f"board_{col}{row}")
