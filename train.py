@@ -8,6 +8,11 @@ import time
 import gc
 import keras.backend as K
 
+d = tf.config.experimental.list_physical_devices('GPU')
+if d:
+    tf.config.experimental.set_memory_growth(d[0], True)
+# tf.debugging.set_log_device_placement(True)
+
 
 INSTANCE = str(int(time.time()))
 MAX_WINNERS = 10
@@ -164,7 +169,7 @@ def fitness_func(solution, sol_idx):
 
 
 def callback_generation(ga_instance):
-    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness, increase_minimax_depth, minimax_depth
+    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness, increase_minimax_depth, minimax_depth, start
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
@@ -194,6 +199,10 @@ def callback_generation(ga_instance):
             with open(os.path.join("logs", f"{int(time.time())}.txt")) as f:
                 f.write(e)
     print([x[0] for x in winners])
+    current = time.time()
+    print(f"Time elasped: {current - start} seconds")
+    start = current
+
 
 
 def get_new_models():
@@ -227,4 +236,5 @@ ga_instance = pygad.GA(
     parallel_processing=None,
 )
 print(f"Instance: <{INSTANCE}> started!!!")
+start = time.time()
 ga_instance.run()

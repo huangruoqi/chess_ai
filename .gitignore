@@ -1,3 +1,4 @@
 .vscode
 temp_model
 back_up
+__pycache__
