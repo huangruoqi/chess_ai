@@ -181,6 +181,7 @@ def callback_generation(ga_instance):
                 save_model(model, f"{str(i).zfill(2)}", fitness)
             os.system("git add .")
             os.system(f'git commit -m "{INSTANCE} - generation {generation}"')
+            os.system("git pull origin main")
             os.system("git push origin main")
             candidates = get_new_models()
             for c in candidates:
@@ -193,7 +194,6 @@ def callback_generation(ga_instance):
 
 
 def get_new_models():
-    os.system("git pull origin main")
     training_instances = os.listdir("model")
     candidates = []
     for i in training_instances:
