@@ -6,7 +6,7 @@ from tensorflow.keras import layers
 import numpy as np
 
 Piece = namedtuple(
-    "Piece", ["color", "type", "score", "pos", "start_pos", "moved", "index"]
+    "Piece", ["color", "type", "score", "pos", "start_pos", "moved", "index", ]
 )
 
 Result = namedtuple("Result", ["winner", "turn", "piece_score"])
