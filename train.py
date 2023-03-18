@@ -56,7 +56,7 @@ def add_to_winners(fitness, weights):
     if winners[0][0] >= fitness:
         return
     for w in winners:
-        if abs(w[0] - fitness) < 0.01:
+        if abs(w[0] - fitness) < 0.001:
             print("Duplicate winner found!!!")
             return
 
@@ -165,7 +165,7 @@ def callback_generation(ga_instance):
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
-    if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.01:
+    if winners[0][0] < last_fitness and abs(previous_fitness - last_fitness) > 0.001:
         add_to_winners(last_fitness, last_weights)
         previous_fitness = last_fitness
         dummy.set_weights(last_weights)
