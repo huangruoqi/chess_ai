@@ -180,9 +180,9 @@ def callback_generation(ga_instance):
         dummy.set_weights(last_weights)
         save_model(dummy, f"{str(generation).zfill(4)}", last_fitness, True)
     last_fitness = 0
-    if increase_minimax_depth:
-        if minimax_depth < 3:
-            minimax_depth += 1
+    # if increase_minimax_depth:
+    #     if minimax_depth < 3:
+    #         minimax_depth += 1
     if generation % 20 == 0:
         try:
             for i, v in enumerate(winners[6:]):
