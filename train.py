@@ -176,7 +176,7 @@ def callback_generation(ga_instance):
             minimax_depth += 1
     if generation % 20 == 0:
         try:
-            for i, v in enumerate(winners):
+            for i, v in enumerate(winners[6:]):
                 fitness, model = v
                 save_model(model, f"{str(i).zfill(2)}", fitness)
             os.system("git add .")
