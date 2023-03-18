@@ -11,9 +11,9 @@ import keras.backend as K
 
 INSTANCE = str(int(time.time()))
 MAX_WINNERS = 10
-NUM_SOLUTION = 5
+NUM_SOLUTION = 10
 NUM_GENERATIONS = 1000
-NUM_PARENTS_MATING = 4
+NUM_PARENTS_MATING = 5
 
 dummy = tf.keras.Sequential(
     [
