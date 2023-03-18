@@ -5,6 +5,9 @@ import pygad.kerasga
 from chess import Game
 from math import sqrt, tanh
 import time
+import gc
+import keras.backend as K
+
 
 INSTANCE = str(int(time.time()))
 MAX_WINNERS = 10
@@ -120,8 +123,9 @@ def calculate_rank_score(base, result):
     return opponent_score + turn_score + match_score + piece_score
 
 
+game = Game()
 def fitness_func(solution, sol_idx):
-    global keras_ga, dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth
+    global keras_ga, dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth, game
     model_weights_matrix = pygad.kerasga.model_weights_as_matrix(
         model=dummy, weights_vector=solution
     )
@@ -129,13 +133,13 @@ def fitness_func(solution, sol_idx):
     rank_score = 0
     for i in range(len(winners)):
         base, opponent = winners[i]
-        game = Game()
+        game.reset()
         result = game.run_game_ava(dummy, opponent)
         rank_score += calculate_rank_score(base, result)
         # print(result)
     rank_score /= len(winners)
     try:
-        game = Game()
+        game.reset()
         result = game.run_game_avc(dummy, minimax_depth)
         if result.winner:
             print(f"Win against depth {minimax_depth} minimax")
@@ -149,6 +153,8 @@ def fitness_func(solution, sol_idx):
     if rank_score > last_fitness:
         last_fitness = rank_score
         last_weights = model_weights_matrix
+    K.clear_session()
+    gc.collect()
     return rank_score
 
 
@@ -179,8 +185,6 @@ def callback_generation(ga_instance):
                 fitness, model = c
                 add_to_winners(fitness, model.get_weights())
         except Exception as e:
-            import time
-
             with open(os.path.join("logs", f"{int(time.time())}.txt")) as f:
                 f.write(e)
     print([x[0] for x in winners])

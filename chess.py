@@ -6,7 +6,7 @@ from tensorflow.keras import layers
 import numpy as np
 
 Piece = namedtuple('Piece',[
-    "color", "type", "score", "pos", "moved", "index"
+    "color", "type", "score", "pos", "start_pos", "moved", "index"
 ])
 
 Result = namedtuple('Result', [
@@ -25,41 +25,41 @@ class Game:
     def __init__(self):
         self.board = [[None]*8 for _ in range(8)]
         self.bpieces = [
-            Piece(False, "r",   5, [0, 0], [False], 0),
-            Piece(False, "n",   3, [0, 1], [False], 1),
-            Piece(False, "b",   3, [0, 2], [False], 2),
-            Piece(False, "q",   9, [0, 3], [False], 3),
-            Piece(False, "k", 200, [0, 4], [False], 4),
-            Piece(False, "b",   3, [0, 5], [False], 5),
-            Piece(False, "n",   3, [0, 6], [False], 6),
-            Piece(False, "r",   5, [0, 7], [False], 7),
-            Piece(False, "p",   1, [1, 0], [False], 8),
-            Piece(False, "p",   1, [1, 1], [False], 9),
-            Piece(False, "p",   1, [1, 2], [False], 10),
-            Piece(False, "p",   1, [1, 3], [False], 11),
-            Piece(False, "p",   1, [1, 4], [False], 12),
-            Piece(False, "p",   1, [1, 5], [False], 13),
-            Piece(False, "p",   1, [1, 6], [False], 14),
-            Piece(False, "p",   1, [1, 7], [False], 15),
+            Piece(False, "r",   5, [0, 0], (0, 0), [False], 0),
+            Piece(False, "n",   3, [0, 1], (0, 1), [False], 1),
+            Piece(False, "b",   3, [0, 2], (0, 2), [False], 2),
+            Piece(False, "q",   9, [0, 3], (0, 3), [False], 3),
+            Piece(False, "k", 200, [0, 4], (0, 4), [False], 4),
+            Piece(False, "b",   3, [0, 5], (0, 5), [False], 5),
+            Piece(False, "n",   3, [0, 6], (0, 6), [False], 6),
+            Piece(False, "r",   5, [0, 7], (0, 7), [False], 7),
+            Piece(False, "p",   1, [1, 0], (1, 0), [False], 8),
+            Piece(False, "p",   1, [1, 1], (1, 1), [False], 9),
+            Piece(False, "p",   1, [1, 2], (1, 2), [False], 10),
+            Piece(False, "p",   1, [1, 3], (1, 3), [False], 11),
+            Piece(False, "p",   1, [1, 4], (1, 4), [False], 12),
+            Piece(False, "p",   1, [1, 5], (1, 5), [False], 13),
+            Piece(False, "p",   1, [1, 6], (1, 6), [False], 14),
+            Piece(False, "p",   1, [1, 7], (1, 7), [False], 15),
         ]
         self.bpieces_alive = [True] * 16
         self.wpieces = [
-            Piece(True, "r",   5, [7, 0], [False], 0),
-            Piece(True, "n",   3, [7, 1], [False], 1),
-            Piece(True, "b",   3, [7, 2], [False], 2),
-            Piece(True, "q",   9, [7, 3], [False], 3),
-            Piece(True, "k", 200, [7, 4], [False], 4),
-            Piece(True, "b",   3, [7, 5], [False], 5),
-            Piece(True, "n",   3, [7, 6], [False], 6),
-            Piece(True, "r",   5, [7, 7], [False], 7),
-            Piece(True, "p",   1, [6, 0], [False], 8),
-            Piece(True, "p",   1, [6, 1], [False], 9),
-            Piece(True, "p",   1, [6, 2], [False], 10),
-            Piece(True, "p",   1, [6, 3], [False], 11),
-            Piece(True, "p",   1, [6, 4], [False], 12),
-            Piece(True, "p",   1, [6, 5], [False], 13),
-            Piece(True, "p",   1, [6, 6], [False], 14),
-            Piece(True, "p",   1, [6, 7], [False], 15),
+            Piece(True, "r",   5, [7, 0], (7, 0), [False], 0),
+            Piece(True, "n",   3, [7, 1], (7, 1), [False], 1),
+            Piece(True, "b",   3, [7, 2], (7, 2), [False], 2),
+            Piece(True, "q",   9, [7, 3], (7, 3), [False], 3),
+            Piece(True, "k", 200, [7, 4], (7, 4), [False], 4),
+            Piece(True, "b",   3, [7, 5], (7, 5), [False], 5),
+            Piece(True, "n",   3, [7, 6], (7, 6), [False], 6),
+            Piece(True, "r",   5, [7, 7], (7, 7), [False], 7),
+            Piece(True, "p",   1, [6, 0], (6, 0), [False], 8),
+            Piece(True, "p",   1, [6, 1], (6, 1), [False], 9),
+            Piece(True, "p",   1, [6, 2], (6, 2), [False], 10),
+            Piece(True, "p",   1, [6, 3], (6, 3), [False], 11),
+            Piece(True, "p",   1, [6, 4], (6, 4), [False], 12),
+            Piece(True, "p",   1, [6, 5], (6, 5), [False], 13),
+            Piece(True, "p",   1, [6, 6], (6, 6), [False], 14),
+            Piece(True, "p",   1, [6, 7], (6, 7), [False], 15),
         ]
         self.wpieces_alive = [True] * 16
         for p in self.wpieces:
@@ -68,6 +68,29 @@ class Game:
         for p in self.bpieces:
             row, col = p.pos
             self.board[col][row] = p
+    
+    def reset(self):
+        self.board = [[None]*8 for _ in range(8)]
+        for i in range(8):
+            for j in range(8):
+                self.board[i][j] = None
+        for p in self.wpieces:
+            row, col = p.start_pos
+            p.pos[0] = row
+            p.pos[1] = col
+            self.board[col][row] = p
+            p.moved[0] = False
+        for p in self.bpieces:
+            row, col = p.start_pos
+            p.pos[0] = row
+            p.pos[1] = col
+            self.board[col][row] = p
+            p.moved[0] = False
+        for i in range(16):
+            self.bpieces_alive[i] = True
+            self.wpieces_alive[i] = True
+            
+
 
     def move(self, piece, row, col):
         p_row, p_col = piece.pos
@@ -565,4 +588,7 @@ if __name__ == '__main__':
         ]
     )
     game = Game()
-    print(game.run_game_ava(model, model))
+    for i in range(10000):
+        game.reset()
+        print(game.run_game_ava(model, model))
+        print(model.get_weights()[0][0][:20])
