@@ -22,12 +22,12 @@ NUM_PARENTS_MATING = 5
 
 dummy = tf.keras.Sequential(
     [
-        layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
-        layers.Dense(400, activation="relu", name="layer2"),
-        layers.Dense(128, activation="relu", name="layer3"),
-        layers.Dense(32, activation="sigmoid", name="layer4"),
-        layers.Dense(8, activation="sigmoid", name="layer5"),
-        layers.Dense(1, activation="sigmoid", name="layer6"),
+        layers.Dense(600, input_shape=(448,), activation="tanh", name="layer1"),
+        layers.Dense(400, activation="tanh", name="layer2"),
+        layers.Dense(128, activation="tanh", name="layer3"),
+        layers.Dense(32, activation="tanh", name="layer4"),
+        layers.Dense(8, activation="tanh", name="layer5"),
+        layers.Dense(1, activation="tanh", name="layer6"),
     ]
 )
 input_layer = layers.Input(batch_shape=dummy.layers[0].input_shape)
