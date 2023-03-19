@@ -24,4 +24,5 @@ run:
 	poetry run python -B ./GUI.py $(MODE)
 
 train:
+	git pull origin main
 	poetry run python -B ./train.py
