@@ -267,11 +267,11 @@ class Game:
         moves = self.get_real_moves(color)
         output = model.predict(self.get_moves_input(moves), verbose=0)
         output = [x[0] if color else -x[0] for x in output]
+        if DEBUG:
+            print(output)
         output = [(b, a) for a, b in enumerate(output)]
         max_value = max(output)[0]
         candidates = list(filter(lambda x: x[0]>max_value-AI_MARGIN, output))
-        if DEBUG:
-            print(candidates)
         return moves[random.choice(candidates)[1]][1]
 
     def get_moves_input(self, moves):
