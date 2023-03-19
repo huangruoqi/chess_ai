@@ -119,7 +119,7 @@ def fitness_func(solution, sol_idx):
             increase_minimax_depth = True
             rank_score += minimax_depth
     except Exception as e:
-        with open(os.path.join("logs", f"{int(time.time())}.txt")) as f:
+        with open(os.path.join("logs", f"{int(time.time())}.txt"), 'w') as f:
             f.write(e)
     print("Rank: {:.3f} Wins: {}".format(rank_score, wins))
     if rank_score > last_fitness:
@@ -158,7 +158,7 @@ def callback_generation(ga_instance):
                 fitness, model = c
                 add_to_winners(fitness, model.get_weights())
         except Exception as e:
-            with open(os.path.join("logs", f"{int(time.time())}.txt")) as f:
+            with open(os.path.join("logs", f"{int(time.time())}.txt"), 'w') as f:
                 f.write(e)
     print([x[0] for x in winners])
     current = time.time()
@@ -184,7 +184,7 @@ def get_new_models():
                 fitness = float(content[1])
                 candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
-    return [load_model(k[1]) for k in candidates[:4]]
+    return [chess_model.load_model(k[1]) for k in candidates[:4]]
 
 
 keras_ga = pygad.kerasga.KerasGA(model=dummy, num_solutions=NUM_SOLUTION)
