@@ -1,8 +1,6 @@
 import random
 import time
 from collections import namedtuple
-import tensorflow as tf
-from tensorflow.keras import layers
 import numpy as np
 
 Piece = namedtuple(
@@ -578,21 +576,3 @@ class Rules:
             return board[col][row]
         else:
             return False
-
-
-if __name__ == "__main__":
-    model = tf.keras.Sequential(
-        [
-            layers.Dense(600, input_shape=(448,), activation="relu", name="layer1"),
-            layers.Dense(400, activation="relu", name="layer2"),
-            layers.Dense(128, activation="relu", name="layer3"),
-            layers.Dense(32, activation="sigmoid", name="layer4"),
-            layers.Dense(8, activation="sigmoid", name="layer5"),
-            layers.Dense(1, activation="sigmoid", name="layer6"),
-        ]
-    )
-    game = Game()
-    for i in range(10000):
-        game.reset()
-        print(game.run_game_ava(model, model))
-        print(model.get_weights()[0][0][:20])
