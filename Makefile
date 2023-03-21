@@ -26,3 +26,6 @@ run:
 train:
 	git pull origin main
 	poetry run python -B ./train.py
+
+save:
+	poetry run python -B ./save.py
