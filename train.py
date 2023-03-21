@@ -1,12 +1,14 @@
 import os
 import tensorflow as tf
 from keras import layers, models
-import pygad.kerasga
+from pygad.kerasga import model_weights_as_matrix, model_weights_as_vector
+import pygad
 from chess import Game
 from math import sqrt, tanh
 import time
 import gc
 import keras.backend as K
+import numpy
 from utils import Chess_Model
 
 d = tf.config.experimental.list_physical_devices('GPU')
@@ -43,6 +45,13 @@ def get_initial_models():
     candidates.sort(reverse=True)
     [print(i) for i in candidates[:MAX_WINNERS]]
     return [chess_model.load_model(k[1]) for k in candidates[:MAX_WINNERS]]
+
+def get_initial_population(models):
+    population = []
+    for fitness, model in models:
+        population.append(model_weights_as_vector(model))
+    return population
+
 
 
 def add_to_winners(fitness, weights):
@@ -93,8 +102,8 @@ game = Game()
 
 
 def fitness_func(solution, sol_idx):
-    global keras_ga, dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth, game
-    model_weights_matrix = pygad.kerasga.model_weights_as_matrix(
+    global dummy, last_fitness, last_weights, winners, increase_minimax_depth, minimax_depth, game
+    model_weights_matrix = model_weights_as_matrix(
         model=dummy, weights_vector=solution
     )
     dummy.set_weights(weights=model_weights_matrix)
@@ -131,7 +140,7 @@ def fitness_func(solution, sol_idx):
 
 
 def callback_generation(ga_instance):
-    global keras_ga, dummy, last_fitness, last_weights, winners, previous_fitness, increase_minimax_depth, minimax_depth, start
+    global dummy, last_fitness, last_weights, winners, previous_fitness, increase_minimax_depth, minimax_depth, start
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
@@ -165,8 +174,6 @@ def callback_generation(ga_instance):
     print(f"Time elasped: {current - start} seconds")
     start = current
 
-
-
 def get_new_models():
     training_instances = os.listdir("model")
     candidates = []
@@ -187,8 +194,8 @@ def get_new_models():
     return [chess_model.load_model(k[1]) for k in candidates[:4]]
 
 
-keras_ga = pygad.kerasga.KerasGA(model=dummy, num_solutions=NUM_SOLUTION)
-initial_population = keras_ga.population_weights
+initial_population = get_initial_population(winners)
+
 ga_instance = pygad.GA(
     num_generations=NUM_GENERATIONS,
     num_parents_mating=NUM_PARENTS_MATING,
