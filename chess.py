@@ -203,7 +203,7 @@ class Game:
         return -p_score if flipped else p_score
 
     def minimax(self, depth, color, alpha, beta, flipped, checked, max_depth):
-        random_choice = False
+        random_choice = True
         opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
         if depth >= max_depth:
             return self.get_score(flipped), None
@@ -259,6 +259,7 @@ class Game:
         best_choice = random.choice(best) if best else None
         return (minimax_value, best_choice)
 
+
     def get_computer_move(self, color, depth):
         score, move = self.minimax(0, color, -10000, 10000, color, True, depth)
         return move
@@ -295,7 +296,7 @@ class Game:
                 else:
                     board_code.extend(piece2index[piece.type])
                     board_code.append(int(piece.color))
-        return board_code
+        return tuple(board_code)
 
     # @timeit
     def run_game_cvc(self):
