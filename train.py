@@ -180,9 +180,9 @@ def get_new_models():
 
 chess_model = Chess_Model()
 dummy = chess_model.get_clone()
+game = Game()
 def run():
     global chess_model, game, winners, dummy, last_winner, last_fitness, last_weights, previous_fitness, minimax_depth, increase_minimax_depth, start
-    game = Game()
     winners = get_initial_models()
     winners.sort(key=lambda x: x[0])
     dummy.set_weights(winners[len(winners) - 1][1].get_weights())
@@ -203,9 +203,8 @@ def run():
     )
     print(f"Instance: <{INSTANCE}> started!!!")
     start = time.time()
-    ga_instance.run()
-
     try:
+        ga_instance.run()
         for i, v in enumerate(winners[6:]):
             fitness, model = v
             chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness)
