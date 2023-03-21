@@ -4,11 +4,12 @@ import numpy
 import os
 
 def main():
-    board2score = {}
-    for i in range(1):
-        save_game(board2score)
-        print(len(board2score))
-    save_results(board2score)
+    while 1: 
+        board2score = {}
+        for i in range(20):
+            save_game(board2score)
+            print(f'rows: {len(board2score)}')
+        save_results(board2score)
 
 
 def save_game(board2score):
