@@ -1,16 +1,29 @@
+from sys import getsizeof
 from chess import Result, Game
 import random
 import numpy
 import os
 import time
 
+
 def main():
-    while 1: 
+    main_board2score = {}
+    while 1:
         board2score = {}
         for i in range(10):
             save_game(board2score)
-            print(f'rows: {len(board2score)}')
-        save_results(board2score)
+        prev = len(main_board2score)
+        save_results(main_board2score, board2score)
+        print(f"{len(main_board2score) - prev} row added.")
+
+
+def convert(board):
+    key = 0
+    for i in board:
+        key <<= 1
+        if i != 0:
+            key += 1
+    return key
 
 
 def save_game(board2score):
@@ -22,7 +35,9 @@ def save_game(board2score):
     total0, total1 = {}, {}
     while 1:
         turn += 1
-        score, move, results = minimax_mod(g, 0, color, -10000, 10000, color, True, depth)
+        score, move, results = minimax_mod(
+            g, 0, color, -10000, 10000, color, True, depth
+        )
         if color:
             for a, b in results:
                 total1[a] = total1.get(a, [])
@@ -48,10 +63,10 @@ def save_game(board2score):
         total = total1
     for k, v in total.items():
         if board2score.get(k) is None:
-            board2score[k] = sum(v)/len(v)
+            board2score[convert(k)] = sum(v) / len(v)
 
 
-def minimax_mod(self:Game, depth, color, alpha, beta, flipped, checked, max_depth):
+def minimax_mod(self: Game, depth, color, alpha, beta, flipped, checked, max_depth):
     results = []
     random_choice = True
     opponent_pieces_alive = self.bpieces_alive if color else self.wpieces_alive
@@ -76,7 +91,9 @@ def minimax_mod(self:Game, depth, color, alpha, beta, flipped, checked, max_dept
         piece.pos[1] = square[1]
         self.board[current_square[1]][current_square[0]] = None
 
-        value, _ = minimax_mod(self, depth + 1, not color, alpha, beta, flipped, checked, max_depth)
+        value, _ = minimax_mod(
+            self, depth + 1, not color, alpha, beta, flipped, checked, max_depth
+        )
         if depth == 0:
             results.append((self.convert_board(), value))
 
@@ -114,33 +131,41 @@ def minimax_mod(self:Game, depth, color, alpha, beta, flipped, checked, max_dept
         return minimax_value, best_choice
 
 
-def save_results(board2score):
-    array_path = os.path.join('nparrays', str(int(time.time())))
+def save_results(main, board2score):
+    array_path = os.path.join("nparrays", str(int(time.time())))
     if not os.path.exists(array_path):
         os.mkdir(array_path)
     inputs, target = [], []
     for k, v in board2score.items():
-        inputs.append(k)
-        target.append(v)
-    save_inputs(os.path.join(array_path, 'inputs.bin'), inputs)
-    numpy.save(os.path.join(array_path, 'target.npy'), numpy.array(target, dtype=numpy.int16))
+        if main.get(k) is None:
+            main[k] = v
+            inputs.append(k)
+            target.append(v)
+    save_inputs(os.path.join(array_path, "inputs.bin"), inputs)
+    numpy.save(
+        os.path.join(array_path, "target.npy"), numpy.array(target, dtype=numpy.int16)
+    )
+
 
 def save_inputs(file, inputs):
-    with open(file, 'wb') as f:
+    with open(file, "wb") as f:
         for i in inputs:
-            assert len(i) == 64*7
             byte = 0
             count = 0
-            for j in i:
+            arr = []
+            for j in range(64 * 7):
                 byte <<= 1
-                if j != 0:
+                if (i & 1) != 0:
                     byte += 1
                 count += 1
+                i >>= 1
                 if count == 8:
-                    f.write(byte.to_bytes(1,'little',signed=False))
+                    arr.append(byte.to_bytes(1, "little", signed=False))
                     byte = 0
                     count = 0
+            for j in reversed(arr):
+                f.write(j)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
