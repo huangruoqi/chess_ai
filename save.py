@@ -2,6 +2,7 @@ from chess import Result, Game
 import random
 import numpy
 import os
+import time
 
 def main():
     while 1: 
@@ -112,9 +113,34 @@ def minimax_mod(self:Game, depth, color, alpha, beta, flipped, checked, max_dept
     else:
         return minimax_value, best_choice
 
+
 def save_results(board2score):
-    data = [list(k)+[v] for k,v in board2score.items()]
-    numpy.save(os.path.join('nparrays', f'{len(data)}.npy'), numpy.array(data))
+    array_path = os.path.join('nparrays', str(int(time.time())))
+    if not os.path.exists(array_path):
+        os.mkdir(array_path)
+    inputs, target = [], []
+    for k, v in board2score.items():
+        inputs.append(k)
+        target.append(v)
+    save_inputs(os.path.join(array_path, 'inputs.bin'), inputs)
+    numpy.save(os.path.join(array_path, 'target.npy'), numpy.array(target, dtype=numpy.float64))
+
+def save_inputs(file, inputs):
+    with open(file, 'wb') as f:
+        for i in inputs:
+            assert len(i) == 64*7
+            byte = 0
+            count = 0
+            for j in i:
+                byte <<= 1
+                if j != 0:
+                    byte += 1
+                count += 1
+                if count == 8:
+                    f.write(byte.to_bytes(1,'little',signed=False))
+                    byte = 0
+                    count = 0
+
 
 if __name__ == '__main__':
     main()
