@@ -123,7 +123,7 @@ def save_results(board2score):
         inputs.append(k)
         target.append(v)
     save_inputs(os.path.join(array_path, 'inputs.bin'), inputs)
-    numpy.save(os.path.join(array_path, 'target.npy'), numpy.array(target, dtype=numpy.float64))
+    numpy.save(os.path.join(array_path, 'target.npy'), numpy.array(target, dtype=numpy.int16))
 
 def save_inputs(file, inputs):
     with open(file, 'wb') as f:
