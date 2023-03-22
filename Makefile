@@ -27,7 +27,7 @@ trainga:
 	git pull origin main
 	poetry run python -B ./train_ga.py
 
-trainga:
+trainbp:
 	git pull origin main
 	poetry run python -B ./train_bp.py
 
