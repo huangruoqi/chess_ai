@@ -7,7 +7,7 @@ import time
 def main():
     while 1: 
         board2score = {}
-        for i in range(20):
+        for i in range(10):
             save_game(board2score)
             print(f'rows: {len(board2score)}')
         save_results(board2score)
