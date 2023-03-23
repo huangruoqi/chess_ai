@@ -4,17 +4,38 @@ import random
 import numpy
 import os
 import time
+from utils import load_inputs, save_inputs
+
+DEPTH = 2
+ROUND = 100
 
 
 def main():
-    main_board2score = {}
+    history = load_arrays()
     while 1:
-        board2score = {}
-        for i in range(10):
-            save_game(board2score)
-        prev = len(main_board2score)
-        save_results(main_board2score, board2score)
-        print(f"{len(main_board2score) - prev} row added.")
+        board2scores = {}
+        for i in range(ROUND):
+            save_game(board2scores)
+        results = {}
+        for k, v in board2scores.items():
+            avg_score = sum(v) / len(v)
+            history[k] = (history.get(k, avg_score) + avg_score) / 2
+            results[k] = history[k]
+        print(f"Saved: {len(results)}")
+        print(f"Total: {len(history)}")
+        save_results(results)
+
+def load_arrays():
+    instances = os.listdir("nparrays")
+    result = {}
+    for i in instances:
+        instance_path = os.path.join("nparrays", i)
+        inputs = load_inputs(os.path.join(instance_path, "inputs.bin"))
+        target = numpy.load(os.path.join(instance_path, "target.npy"))
+        assert len(inputs) == len(target)
+        for i in range(len(inputs)):
+            result[convert(inputs)] = target[i]
+    return result
 
 
 def convert(board):
@@ -30,13 +51,12 @@ def save_game(board2score):
     g = Game()
     r = None
     color = True
-    depth = 2
     turn = 0
     total0, total1 = {}, {}
     while 1:
         turn += 1
         score, move, results = minimax_mod(
-            g, 0, color, -10000, 10000, color, True, depth
+            g, 0, color, -10000, 10000, color, True, DEPTH
         )
         if color:
             for a, b in results:
@@ -55,15 +75,17 @@ def save_game(board2score):
         if turn > 200:
             r = Result(None, turn, g.get_piece_score(True))
             break
-    print(r)
     if r.winner is None:
         return
     total = total0
     if r.winner:
         total = total1
     for k, v in total.items():
-        if board2score.get(k) is None:
-            board2score[convert(k)] = sum(v) / len(v)
+        real_key = convert(k)
+        if board2score.get(real_key) is None:
+            board2score[real_key] = v
+        else:
+            board2score[real_key].extend(v)
 
 
 def minimax_mod(self: Game, depth, color, alpha, beta, flipped, checked, max_depth):
@@ -131,19 +153,17 @@ def minimax_mod(self: Game, depth, color, alpha, beta, flipped, checked, max_dep
         return minimax_value, best_choice
 
 
-def save_results(main, board2score):
-    array_path = os.path.join("nparrays", str(int(time.time())))
+def save_results(board2score):
+    array_path = os.path.join("nparrays", f"D{DEPTH}_{str(int(time.time()))[4:]}")
     if not os.path.exists(array_path):
         os.mkdir(array_path)
     inputs, target = [], []
     for k, v in board2score.items():
-        if main.get(k) is None:
-            main[k] = v
-            inputs.append(k)
-            target.append(v)
+        inputs.append(k)
+        target.append(v)
     save_inputs(os.path.join(array_path, "inputs.bin"), inputs)
     numpy.save(
-        os.path.join(array_path, "target.npy"), numpy.array(target, dtype=numpy.int16)
+        os.path.join(array_path, "target.npy"), numpy.array(target, dtype=numpy.float64)
     )
 
 

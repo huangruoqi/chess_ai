@@ -47,3 +47,42 @@ class Chess_Model:
         info_path = os.path.join(model_path, "info.txt")
         with open(info_path, "w") as f:
             f.write(f"<fitness> {fitness}")
+
+
+def load_inputs(file):
+    inputs = []
+    with open(file, "rb") as f:
+        content = bytearray(f.read())
+        row = [0] * (64 * 7)
+        count = 0
+        for byte in content:
+            for j in range(8):
+                x = byte & 1
+                byte >>= 1
+                if x == 1:
+                    row[8 * count + j] = 1
+            count += 1
+            if count == 64 * 7 // 8:
+                inputs.append(row)
+                row = [0] * (64 * 7)
+                count = 0
+    return inputs
+
+def save_inputs(file, inputs):
+    with open(file, "wb") as f:
+        for i in inputs:
+            byte = 0
+            count = 0
+            arr = []
+            for j in range(64 * 7):
+                byte <<= 1
+                if (i & 1) != 0:
+                    byte += 1
+                count += 1
+                i >>= 1
+                if count == 8:
+                    arr.append(byte.to_bytes(1, "little", signed=False))
+                    byte = 0
+                    count = 0
+            for j in reversed(arr):
+                f.write(j)

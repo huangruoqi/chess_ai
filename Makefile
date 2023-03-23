@@ -23,13 +23,17 @@ endif
 run:
 	poetry run python -B ./GUI.py $(MODE)
 
-trainga:
+train1:
 	git pull origin main
-	poetry run python -B ./train_ga.py
+	poetry run python -B ./train_bp_minimax.py
 
-trainbp:
+train2:
 	git pull origin main
-	poetry run python -B ./train_bp.py
+	poetry run python -B ./train_ga_minimax.py
+
+train3:
+	git pull origin main
+	poetry run python -B ./train_ga_self.py
 
 save:
 	poetry run python -B ./save.py
