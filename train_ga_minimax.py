@@ -1,6 +1,5 @@
 import os
 import tensorflow as tf
-from keras import layers, models
 from pygad.kerasga import model_weights_as_matrix, model_weights_as_vector
 import pygad
 from chess import Game
@@ -8,7 +7,6 @@ from math import sqrt, tanh
 import time
 import gc
 import keras.backend as K
-import numpy
 from utils import Chess_Model
 
 d = tf.config.experimental.list_physical_devices("GPU")

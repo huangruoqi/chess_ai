@@ -11,6 +11,7 @@ ROUND = 100
 
 def main():
     history = load_arrays()
+    print(f"Loaded {len(history)} records")
     while 1:
         board2scores = {}
         for i in range(ROUND):
@@ -24,16 +25,17 @@ def main():
         print(f"Total: {len(history)}")
         save_results(results)
 
-def load_arrays():
+def load_arrays(converted=True):
     instances = os.listdir("nparrays")
     result = {}
     for i in instances:
+        print(f"Loading <{i}>")
         instance_path = os.path.join("nparrays", i)
         inputs = load_inputs(os.path.join(instance_path, "inputs.bin"))
         target = numpy.load(os.path.join(instance_path, "target.npy"))
         assert len(inputs) == len(target)
-        for i in range(len(inputs)):
-            result[convert(inputs)] = target[i]
+        for a, b in zip(inputs, target):
+            result[convert(a) if converted else tuple(a)] = b
     return result
 
 
@@ -44,7 +46,6 @@ def convert(board):
         if i != 0:
             key += 1
     return key
-
 
 def save_game(board2score):
     g = Game()
@@ -153,7 +154,7 @@ def minimax_mod(self: Game, depth, color, alpha, beta, flipped, checked, max_dep
 
 
 def save_results(board2score):
-    array_path = os.path.join("nparrays", f"D{DEPTH}_{str(int(time.time()))[4:]}")
+    array_path = os.path.join("nparrays", f"D{DEPTH}_{str(int(time.time()))[2:]}")
     if not os.path.exists(array_path):
         os.mkdir(array_path)
     inputs, target = [], []
