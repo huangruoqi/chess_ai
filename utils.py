@@ -1,6 +1,7 @@
 import tensorflow as tf
 from keras import layers, models
 import os
+from math import tanh
 
 class Chess_Model:
     def __init__(self):
@@ -86,3 +87,6 @@ def save_inputs(file, inputs):
                     count = 0
             for j in reversed(arr):
                 f.write(j)
+
+def clamp_score(scores):
+    return list(map(lambda s: tanh(s / 25), scores))

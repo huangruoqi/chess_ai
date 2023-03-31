@@ -11,7 +11,6 @@ ROUND = 100
 
 def main():
     history = load_arrays()
-    print(f"Loaded {len(history)} records")
     while 1:
         board2scores = {}
         for i in range(ROUND):
@@ -36,6 +35,7 @@ def load_arrays(converted=True):
         assert len(inputs) == len(target)
         for a, b in zip(inputs, target):
             result[convert(a) if converted else tuple(a)] = b
+    print(f"Loaded {len(result)} records")
     return result
 
 
