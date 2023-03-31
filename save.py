@@ -1,4 +1,3 @@
-from sys import getsizeof
 from chess import Result, Game
 import random
 import numpy
