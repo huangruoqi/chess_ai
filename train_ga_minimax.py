@@ -56,7 +56,7 @@ def calculate_rank_score(base, result):
     elif result.winner is None:
         turn_score = 0
 
-    match_score = NUM_WINNERS if result.winner else -NUM_WINNERS
+    match_score = NUM_WINNERS*2 if result.winner else -NUM_WINNERS
     if result.winner is None:
         match_score = -NUM_WINNERS//2
 
