@@ -5,8 +5,8 @@ import os
 import time
 from utils import load_inputs, save_inputs
 
-DEPTH = 2
-ROUND = 100
+DEPTH = 3
+ROUND = 20
 
 
 def main():
@@ -75,6 +75,7 @@ def save_game(board2score):
         if turn > 200:
             r = Result(None, turn, g.get_piece_score(True))
             break
+    print(r)
     if r.winner is None:
         return
     total = total0

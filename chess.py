@@ -241,6 +241,7 @@ class Game:
                     minimax_value = value
                     beta = min(beta, value)
                     if beta < alpha or (not random_choice and beta == alpha):
+                        # print("-10000")
                         return -10000, None
                     best.clear()
                 if depth == 0 and value == minimax_value:
@@ -250,6 +251,7 @@ class Game:
                     minimax_value = value
                     alpha = max(alpha, value)
                     if beta < alpha or (not random_choice and beta == alpha):
+                        # print("10000")
                         return 10000, None
                     best.clear()
                 if depth == 0 and value == minimax_value:
@@ -299,7 +301,7 @@ class Game:
     # @timeit
     def run_game_cvc(self):
         color = True
-        depth = 2
+        depth = 5
         turn = 0
         while 1:
             turn += 1
