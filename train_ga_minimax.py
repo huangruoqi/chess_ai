@@ -69,7 +69,7 @@ def fitness_func(solution, sol_idx):
     dummy.set_weights(weights=model_weights_matrix)
     rank_score = 0
     wins = 0
-    for i in range(len(NUM_MATCH)):
+    for i in range(NUM_MATCH):
         base, opponent = winners[i]
         game.reset()
         result = game.run_game_avc(dummy)
@@ -162,18 +162,14 @@ def run():
     )
     print(f"Instance: <{INSTANCE}> started!!!")
     start = time.time()
-    try:
-        ga_instance.run()
-        for i, v in enumerate(winners):
-            fitness, model = v
-            chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness)
-        os.system("git add .")
-        os.system(f'git commit -m "Instance: {INSTANCE}"')
-        os.system("git pull origin main")
-        os.system("git push origin main")
-    except Exception as e:
-        with open(os.path.join("logs", f"{int(time.time())}.txt"), "w") as f:
-            f.write(e)
+    ga_instance.run()
+    for i, v in enumerate(winners):
+        fitness, model = v
+        chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness)
+    os.system("git add .")
+    os.system(f'git commit -m "Instance: {INSTANCE}"')
+    os.system("git pull origin main")
+    os.system("git push origin main")
 
 if __name__ == '__main__':
     while 1:
