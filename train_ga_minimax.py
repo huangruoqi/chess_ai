@@ -56,10 +56,11 @@ def calculate_rank_score(base, result):
     elif result.winner is None:
         turn_score = 0
 
-    match_score = 3 if result.winner else -1
-    piece_score = tanh(result.piece_score / 25)
+    match_score = NUM_WINNERS if result.winner else -NUM_WINNERS
     if result.winner is None:
-        match_score = 0
+        match_score = -NUM_WINNERS//2
+
+    piece_score = tanh(result.piece_score / 25)
     return opponent_score + turn_score + match_score + piece_score
 
 
@@ -72,13 +73,13 @@ def fitness_func(solution, sol_idx):
     for i in range(NUM_MATCH):
         base, opponent = winners[i]
         game.reset()
-        result = game.run_game_avc(dummy)
+        result = game.run_game_avc(model=dummy, depth=DEPTH)
         if result.winner:
             wins += 1
         rank_score += calculate_rank_score(base, result)
         if DEBUG:
             print(result)
-    rank_score /= len(NUM_MATCH)
+    rank_score /= NUM_MATCH
     print("Rank: {:.3f} Wins: {}".format(rank_score, wins))
     if rank_score > last_fitness:
         last_fitness = rank_score

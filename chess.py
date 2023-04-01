@@ -318,8 +318,6 @@ class Game:
     def run_game_avc(self, model, depth):
         color = True
         turn = 0
-        previous_move2 = None
-        previous_move1 = None
 
         while 1:
             turn += 1
@@ -330,11 +328,7 @@ class Game:
             else:
                 move = self.get_computer_move(color, depth)
                 piece, square = move
-                if previous_move2 == move:
-                    return Result(None, turn, self.get_piece_score(True))
                 self.move(piece, *square)
-                previous_move2 = previous_move1
-                previous_move1 = move
             if self.is_checkmate(not color):
                 return Result(color, turn, self.get_piece_score(True))
             color = not color
