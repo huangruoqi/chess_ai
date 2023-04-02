@@ -1,6 +1,6 @@
-<fitness> -4.017255508578673
-Result(winner=False, turn=80, piece_score=-38)
-Result(winner=None, turn=201, piece_score=-12)
+<fitness> -3.668961243839432
+Result(winner=None, turn=201, piece_score=-8)
+Result(winner=None, turn=201, piece_score=-8)
+Result(winner=False, turn=138, piece_score=-21)
 Result(winner=None, turn=201, piece_score=-6)
-Result(winner=False, turn=194, piece_score=-6)
-Result(winner=None, turn=201, piece_score=-3)
+Result(winner=None, turn=201, piece_score=-7)
