@@ -1,2 +1,2 @@
 <fitness> -3.668961243839432
-Result(winner=None, turn=201, piece_score=-3)
+Result(winner=None, turn=201, piece_score=-32)
