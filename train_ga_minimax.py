@@ -141,7 +141,7 @@ def run():
         on_generation=callback_generation,
         parallel_processing=None,
     )
-    # print(f"Instance: <{INSTANCE}> started!!!")
+    print(f"Instance: <{INSTANCE}> started!!!")
     start = time.time()
     ga_instance.run()
 
