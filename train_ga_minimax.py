@@ -15,11 +15,12 @@ if d:
 # tf.debugging.set_log_device_placement(True)
 
 
-INSTANCE = str(int(time.time()))
-NUM_SOLUTION = 10
+# INSTANCE = str(int(time.time()))
+INSTANCE = "BEST"
+NUM_SOLUTION = 4
 NUM_PARENTS_MATING = 4
 NUM_MATCH = 5
-NUM_WINNERS = 4
+NUM_WINNERS = 10
 DEPTH = 1
 DEBUG = True
 
@@ -64,17 +65,19 @@ def calculate_rank_score(result):
 
 
 def fitness_func(solution, sol_idx):
-    global dummy, last_fitness, last_weights, game
+    global dummy, last_fitness, last_weights, last_record, game
     model_weights_matrix = model_weights_as_matrix(model=dummy, weights_vector=solution)
     dummy.set_weights(weights=model_weights_matrix)
     rank_score = 0
     wins = 0
+    record = ""
     for i in range(NUM_MATCH):
         game.reset()
         result = game.run_game_avc(model=dummy, depth=DEPTH)
         if result.winner:
             wins += 1
         rank_score += calculate_rank_score(result)
+        record += str(result)
         if DEBUG:
             print(result)
     rank_score /= NUM_MATCH
@@ -82,13 +85,14 @@ def fitness_func(solution, sol_idx):
     if rank_score > last_fitness:
         last_fitness = rank_score
         last_weights = model_weights_matrix
+        last_record = record
     K.clear_session()
     gc.collect()
     return rank_score
 
 
 def callback_generation(ga_instance):
-    global dummy, last_fitness, last_weights, start, previous_fitness
+    global dummy, last_fitness, last_weights, start, previous_fitness, last_record
     generation = ga_instance.generations_completed
     print("Generation = {generation}".format(generation=generation))
     print("Fitness    = {fitness}".format(fitness=last_fitness))
@@ -96,32 +100,13 @@ def callback_generation(ga_instance):
     previous_fitness = last_fitness
     dummy.set_weights(last_weights)
     chess_model.save_model(
-        dummy, INSTANCE, f"{str(generation).zfill(4)}", last_fitness, True
+        dummy, INSTANCE, f"{str(generation).zfill(4)}", last_fitness, True, last_record
     )
     last_fitness = -10000
     current = time.time()
     print(f"Time elasped: {current - start} seconds")
     start = current
 
-
-def get_new_models():
-    training_instances = os.listdir("model")
-    candidates = []
-    for i in training_instances:
-        if i == INSTANCE:
-            continue
-        instance_path = os.path.join("model", i)
-        model_names = os.listdir(instance_path)
-        model_names.sort(reverse=True)
-        for j in model_names:
-            model_path = os.path.join(instance_path, j)
-            with open(os.path.join(model_path, "info.txt"), "r") as f:
-                content = f.read().split()
-                assert len(content) == 2
-                fitness = float(content[1])
-                candidates.append((fitness, model_path))
-    candidates.sort(reverse=True)
-    return [chess_model.load_model(k[1]) for k in candidates[:4]]
 
 chess_model = Chess_Model()
 dummy = chess_model.get_clone()
@@ -146,7 +131,7 @@ def add_to_winners(fitness, weights):
     winners.sort(key=lambda x: x[0])
 
 def run():
-    global chess_model, game, winners, last_fitness, last_weights, start
+    global chess_model, game, winners, last_fitness, last_weights, start, last_record
     winners = get_initial_models()
     winners.sort(key=lambda x: x[0])
     last_fitness = -10000
@@ -162,11 +147,12 @@ def run():
     print(f"Instance: <{INSTANCE}> started!!!")
     start = time.time()
     ga_instance.run()
+    fitness = 0
     for i, v in enumerate(winners):
         fitness, model = v
-        chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness)
+        chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness, False, last_record)
     os.system("git add .")
-    os.system(f'git commit -m "Instance: {INSTANCE}"')
+    os.system(f'git commit -m "Best: {fitness}"')
     os.system("git pull origin main")
     os.system("git push origin main")
 

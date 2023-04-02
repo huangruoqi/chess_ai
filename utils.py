@@ -30,7 +30,6 @@ class Chess_Model:
         fitness = 0
         with open(info_path, "r") as f:
             content = f.read().split()
-            assert len(content) == 2
             fitness = float(content[1])
         return [fitness, model]
 
