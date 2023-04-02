@@ -56,9 +56,9 @@ def calculate_rank_score(result):
     elif result.winner is None:
         turn_score = 0
 
-    match_score = NUM_WINNERS*2 if result.winner else -NUM_WINNERS
+    match_score = NUM_MATCH*2 if result.winner else -NUM_MATCH
     if result.winner is None:
-        match_score = -NUM_WINNERS//2
+        match_score = -NUM_MATCH//2
 
     piece_score = tanh(result.piece_score / 25)
     return turn_score + match_score + piece_score
@@ -77,7 +77,7 @@ def fitness_func(solution, sol_idx):
         if result.winner:
             wins += 1
         rank_score += calculate_rank_score(result)
-        record += str(result)
+        record += str(result) + '\n'
         if DEBUG:
             print(result)
     rank_score /= NUM_MATCH
@@ -114,8 +114,6 @@ game = Game()
 
 def add_to_winners(fitness, weights):
     global chess_model, winners
-    if winners[0][0] >= fitness:
-        return
     for w in winners:
         if abs(w[0] - fitness) < 0.001:
             print("Duplicate winner found!!!")
@@ -126,6 +124,8 @@ def add_to_winners(fitness, weights):
         model.set_weights(weights)
         winners.append([fitness, model])
     else:
+        if winners[0][0] >= fitness:
+            return
         winners[0][0] = fitness
         winners[0][1].set_weights(weights)
     winners.sort(key=lambda x: x[0])

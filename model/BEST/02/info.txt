@@ -1,2 +1,6 @@
 <fitness> -2.0
-Result(winner=False, turn=84, piece_score=-15)Result(winner=None, turn=201, piece_score=-15)Result(winner=None, turn=201, piece_score=-2)Result(winner=None, turn=201, piece_score=-6)Result(winner=None, turn=201, piece_score=-17)
+Result(winner=False, turn=80, piece_score=-38)
+Result(winner=None, turn=201, piece_score=-12)
+Result(winner=None, turn=201, piece_score=-6)
+Result(winner=False, turn=194, piece_score=-6)
+Result(winner=None, turn=201, piece_score=-3)
