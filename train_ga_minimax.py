@@ -17,7 +17,7 @@ if d:
 
 INSTANCE = str(int(time.time()))
 NUM_SOLUTION = 10
-NUM_PARENTS_MATING = 5
+NUM_PARENTS_MATING = 4
 NUM_MATCH = 5
 NUM_WINNERS = 4
 DEPTH = 1
@@ -34,7 +34,7 @@ def get_initial_models():
             model_path = os.path.join(instance_path, j)
             with open(os.path.join(model_path, "info.txt"), "r") as f:
                 content = f.read().split()
-                assert len(content) == 2
+                assert len(content) >= 2
                 fitness = float(content[1])
                 candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
@@ -48,8 +48,7 @@ def get_initial_population(models):
     return population
 
 
-def calculate_rank_score(base, result):
-    opponent_score = base
+def calculate_rank_score(result):
     turn_score = -sqrt(result.turn) / 8 + 1
     if result.winner is False:
         turn_score = -turn_score
@@ -61,7 +60,7 @@ def calculate_rank_score(base, result):
         match_score = -NUM_WINNERS//2
 
     piece_score = tanh(result.piece_score / 25)
-    return opponent_score + turn_score + match_score + piece_score
+    return turn_score + match_score + piece_score
 
 
 def fitness_func(solution, sol_idx):
@@ -71,12 +70,11 @@ def fitness_func(solution, sol_idx):
     rank_score = 0
     wins = 0
     for i in range(NUM_MATCH):
-        base, opponent = winners[i]
         game.reset()
         result = game.run_game_avc(model=dummy, depth=DEPTH)
         if result.winner:
             wins += 1
-        rank_score += calculate_rank_score(base, result)
+        rank_score += calculate_rank_score(result)
         if DEBUG:
             print(result)
     rank_score /= NUM_MATCH
@@ -154,7 +152,7 @@ def run():
     last_fitness = -10000
 
     ga_instance = pygad.GA(
-        num_generations=20,
+        num_generations=1,
         num_parents_mating=NUM_PARENTS_MATING,
         initial_population=get_initial_population(winners),
         fitness_func=fitness_func,

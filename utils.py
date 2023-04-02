@@ -35,7 +35,7 @@ class Chess_Model:
         return [fitness, model]
 
 
-    def save_model(self, model, instance, name, fitness, temp=False):
+    def save_model(self, model, instance, name, fitness, temp=False, fitness_record="No record"):
         instance_path = os.path.join("model", instance)
         if temp:
             instance_path = os.path.join("temp_model", instance)
@@ -48,6 +48,7 @@ class Chess_Model:
         info_path = os.path.join(model_path, "info.txt")
         with open(info_path, "w") as f:
             f.write(f"<fitness> {fitness}")
+            f.write(f"\n{fitness_record}")
 
 
 def load_inputs(file):
