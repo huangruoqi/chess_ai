@@ -1,4 +1,4 @@
-<fitness> -6.4129519470953245
+<fitness> -4.298231674283509
 Result(winner=None, turn=201, piece_score=-12)
 Result(winner=None, turn=201, piece_score=-12)
 Result(winner=None, turn=201, piece_score=-28)
