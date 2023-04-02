@@ -134,7 +134,7 @@ def run():
     last_fitness = -10000
 
     ga_instance = pygad.GA(
-        num_generations=1,
+        num_generations=20,
         num_parents_mating=NUM_PARENTS_MATING,
         initial_population=get_initial_population(winners),
         fitness_func=fitness_func,
