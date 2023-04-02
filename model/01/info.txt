@@ -1,0 +1,2 @@
+<fitness> -5.0
+Result(winner=None, turn=201, piece_score=-29)

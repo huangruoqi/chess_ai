@@ -35,7 +35,7 @@ class Chess_Model:
 
 
     def save_model(self, model, instance, name, fitness, temp=False, fitness_record="No record"):
-        instance_path = os.path.join("model", instance)
+        instance_path = os.path.join("model")
         if temp:
             instance_path = os.path.join("temp_model", instance)
         model_path = os.path.join(instance_path, name)

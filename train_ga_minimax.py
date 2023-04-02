@@ -17,34 +17,33 @@ if d:
 
 # INSTANCE = str(int(time.time()))
 INSTANCE = "BEST"
-NUM_SOLUTION = 4
-NUM_PARENTS_MATING = 4
-NUM_MATCH = 5
-NUM_WINNERS = 10
+NUM_SOLUTION = 1
+NUM_PARENTS_MATING = 1
+NUM_MATCH = 1
+NUM_WINNERS = 20
 DEPTH = 1
 DEBUG = True
 
 
 def get_initial_models():
-    training_instances = os.listdir("model")
     candidates = []
-    for i in training_instances:
-        instance_path = os.path.join("model", i)
-        model_names = os.listdir(instance_path)
-        for j in model_names:
-            model_path = os.path.join(instance_path, j)
-            with open(os.path.join(model_path, "info.txt"), "r") as f:
-                content = f.read().split()
-                assert len(content) >= 2
-                fitness = float(content[1])
-                candidates.append((fitness, model_path))
+    model_names = os.listdir("model")
+    for j in model_names:
+        model_path = os.path.join("model", j)
+        with open(os.path.join(model_path, "info.txt"), "r") as f:
+            content = f.read().split()
+            assert len(content) >= 2
+            fitness = float(content[1])
+            candidates.append((fitness, model_path))
     candidates.sort(reverse=True)
-    return [chess_model.load_model(k[1]) for k in candidates[:NUM_SOLUTION]]
+    return sorted([chess_model.load_model(k[1]) for k in candidates][:NUM_WINNERS], key=lambda x: x[0])
+
+    
 
 
 def get_initial_population(models):
     population = []
-    for fitness, model in models:
+    for fitness, model in models[:NUM_SOLUTION]:
         population.append(model_weights_as_vector(model))
     return population
 
@@ -133,7 +132,6 @@ def add_to_winners(fitness, weights):
 def run():
     global chess_model, game, winners, last_fitness, last_weights, start, last_record
     winners = get_initial_models()
-    winners.sort(key=lambda x: x[0])
     last_fitness = -10000
 
     ga_instance = pygad.GA(
@@ -144,16 +142,20 @@ def run():
         on_generation=callback_generation,
         parallel_processing=None,
     )
-    print(f"Instance: <{INSTANCE}> started!!!")
+    # print(f"Instance: <{INSTANCE}> started!!!")
     start = time.time()
     ga_instance.run()
+
+    os.system("git pull origin main")
+    new_winners = get_initial_models()
+    for fitness, model in new_winners:
+        add_to_winners(fitness, model.get_weights())
     fitness = 0
     for i, v in enumerate(winners):
         fitness, model = v
-        chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness, False, last_record)
+        chess_model.save_model(model, "", f"{str(i).zfill(2)}", fitness, False, last_record)
     os.system("git add .")
     os.system(f'git commit -m "Best: {fitness}"')
-    os.system("git pull origin main")
     os.system("git push origin main")
 
 if __name__ == '__main__':
