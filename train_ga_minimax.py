@@ -15,11 +15,10 @@ if d:
 # tf.debugging.set_log_device_placement(True)
 
 
-# INSTANCE = str(int(time.time()))
-INSTANCE = "BEST"
-NUM_SOLUTION = 1
-NUM_PARENTS_MATING = 1
-NUM_MATCH = 1
+INSTANCE = str(int(time.time()))
+NUM_SOLUTION = 8
+NUM_PARENTS_MATING = 4
+NUM_MATCH = 10
 NUM_WINNERS = 20
 DEPTH = 1
 DEBUG = True
@@ -153,7 +152,7 @@ def run():
     fitness = 0
     for i, v in enumerate(winners):
         fitness, model = v
-        chess_model.save_model(model, "", f"{str(i).zfill(2)}", fitness, False, last_record)
+        chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness, False, last_record)
     os.system("git add .")
     os.system(f'git commit -m "Best: {fitness}"')
     os.system("git push origin main")
