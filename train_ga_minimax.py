@@ -155,6 +155,7 @@ def run():
         chess_model.save_model(model, INSTANCE, f"{str(i).zfill(2)}", fitness, False, last_record)
     os.system("git add .")
     os.system(f'git commit -m "Best: {fitness}"')
+    os.system("git pull origin main")
     os.system("git push origin main")
 
 if __name__ == '__main__':
