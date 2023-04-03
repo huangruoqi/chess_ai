@@ -10,7 +10,7 @@ Piece = namedtuple(
 Result = namedtuple("Result", ["winner", "turn", "piece_score"])
 
 AI_MARGIN = 0.1
-DEBUG = True
+DEBUG = False
 
 def timeit(func):
     def timeit_func(*args, **kwargs):
